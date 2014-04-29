@@ -60,9 +60,6 @@ def grapPartElement(n,s,p,sc):
 	return gpe
 
 
-
-
-
 def indent(elem, level=0):
 	i = "\n" + level*"  "
 	if len(elem):
@@ -251,7 +248,6 @@ class grapingScreenFrame(wx.Frame):
 	def close(self,event):
 		self.Hide()
 		#self.Close()
-
 
 class grapPartFrame(wx.Frame):
 	global SCREEN_SIZE
@@ -529,7 +525,7 @@ def createMap(mapPath,state,pos,scale):
 	newFrame.scale=scale
 	newFrame.name=mapPath #os.path.basename(mapPath)
 	newFrame.SetSize(mapSize)
-	print startPos
+	#print startPos
 	newFrame.SetPosition(startPos)
 	newFrame.bg.SetBitmap(wx.BitmapFromImage(tImage))
 
@@ -538,11 +534,10 @@ def createMap(mapPath,state,pos,scale):
 	newFrame.bg.SetBitmap(wx.BitmapFromImage(tim))  
 	newFrame.SetSize(tSize)
 
-
+	
+	saveChange(MAIN_SETTINGS_TREE,mapPath,state,pos,scale)
 	newFrame.Show()
 	ALL_FRAME.append(newFrame)
-
-
 		
 def grap(box,sPath):
 	global GRAP_NUM
@@ -560,6 +555,7 @@ def grap(box,sPath):
 	cim.paste(region, (0,0))
 	cim.save(sPath)
 	createMap(sPath,False,[box[0],box[1]],1)
+
 def screenCapture(savePath,size):
 	global SAVE_SCREEN_MAP_PATH
 
@@ -575,10 +571,6 @@ def screenCapture(savePath,size):
 
 	saveBitMap.SaveBitmapFile(saveDC,SAVE_SCREEN_MAP_PATH)  
 	Image.open(SAVE_SCREEN_MAP_PATH).save(SAVE_SCREEN_MAP_PATH[:-4]+".png")  
-
-
-
-	
 
 def grapStart(bmp):
 	global SCREEN_SIZE
