@@ -8,7 +8,6 @@ import wx
 import os,sys,time 
 import string
 
-GRAP_NUM=0
 ROOT_DIR=os.getcwd()
 #ROOT_DIR="K:\\temp\\screenGrap_Fengx\\"
 ICON_PATH=ROOT_DIR+"\\app.ico"
@@ -106,7 +105,7 @@ else:
 
 
 def saveChange(mainTree,name,s,pos,sc):
-
+	print mainTree,name,s,pos,sc
 	sTree=grapPartElement(name,s,pos,str(sc))
 
 	if mainTree.find(name)!=None:
@@ -129,6 +128,7 @@ class TB_Icon(wx.TaskBarIcon):
 	m_show=wx.NewId()
 	m_screenGrap=wx.NewId()
 	m_DeleteAll=wx.NewId()
+	m_reset=wx.NewId()
 	def __init__(self, frame):
 		wx.TaskBarIcon.__init__(self)
 		self.frame = frame
@@ -141,15 +141,19 @@ class TB_Icon(wx.TaskBarIcon):
 		self.Bind(wx.EVT_MENU, self.grapScreen, id=self.m_screenGrap)
 		self.Bind(wx.EVT_MENU, self.closeApp, id=self.m_close)
 		self.Bind(wx.EVT_MENU, self.onDeleteAll, id=self.m_DeleteAll)
+		self.Bind(wx.EVT_MENU, self.reset, id=self.m_reset)
 	def CreatePopupMenu(self):
 		menu= wx.Menu()
 		menu.Append(self.m_show, "Show all window") 
 		menu.Append(self.m_hide,  "Hide all window")
+		menu.Append(self.m_reset,"resetPosition")
 		menu.AppendSeparator()
 		menu.Append(self.m_screenGrap, "Grap")
 		menu.Append(self.m_DeleteAll, "Delete All DATA")
 		menu.Append(self.m_close, "Exit")
+		
 		return menu
+
 
 	def OnTaskBarActivate(self, evt):
 		grapStart(bmp)
@@ -166,6 +170,25 @@ class TB_Icon(wx.TaskBarIcon):
 	def OnTaskBarChange(self, evt):
 		self.SetIcon(wx.Icon(os.getcwd()+'\\arp.ico'), "This is a new icon: " + name)
 		#self.frame.Show(True)
+	def reset(self,evt):
+		i=0
+		for s in ALL_FRAME:
+			i+=1
+			try:
+				#s.show()
+				a=1
+				s.scale=0.4
+				
+				s.pos=[i*60,i*60]
+				s.miniState=False
+				s.SetPosition(s.pos)
+				s.resizeMap(s.scale)
+			except :
+				print ""
+		#os.remove(SET_FILE_PATH)
+
+		#MAIN_SETTINGS_TREE=Element(" ")
+		#start()
 	def showALL_FRAME(self,evt):
 		for s in ALL_FRAME:
 			try:
@@ -213,7 +236,7 @@ class TB_Icon(wx.TaskBarIcon):
 class grapingScreenFrame(wx.Frame):
 	global ICON_PATH
 	global SAVE_GRAP_MAP_PATH
-	global GRAP_RECT
+	
 	global SCREEN_SIZE
 	print SCREEN_SIZE
 	global MAIN_SETTINGS_TREE
@@ -237,30 +260,20 @@ class grapingScreenFrame(wx.Frame):
 	def OnLeftMouseDown(self, event):
 		GRAP_RECT[0]= event.GetPosition()[0]
 		GRAP_RECT[1]= event.GetPosition()[1]
-		print GRAP_RECT
+	
 			
 	def OnLeftMouseUp(self, event):
 		GRAP_RECT[2]= event.GetPosition()[0]
 		GRAP_RECT[3]= event.GetPosition()[1]
 		self.Hide()
 		grap(GRAP_RECT,SAVE_GRAP_MAP_PATH)
-		#print GRAP_RECT
+		
 	def close(self,event):
 		self.Hide()
 		#self.Close()
 
 class grapPartFrame(wx.Frame):
 	global SCREEN_SIZE
-	global GRAP_RECT
-	global CAN_MOVE
-	global GRAP_NUM
-	global GRAP_MAP_RECT
-
-
-	cRect=[0,0,0,0]
-	cRect[0]=GRAP_RECT[0]
-	cRect[1]=GRAP_RECT[1]
-
 
 	name=""
 	miniState=False
@@ -276,7 +289,6 @@ class grapPartFrame(wx.Frame):
 	
 
 	def __init__(self, parent, id):
-		self.ID=GRAP_NUM
 		wx.Frame.__init__(self, parent, id, 'fengx', size=SCREEN_SIZE,style=wx.SIMPLE_BORDER|wx.STAY_ON_TOP)
 		#self.bg=wx.StaticBitmap(self,-1,  wx.EmptyBitmap(10,10, depth=-1), (0,0))
 
@@ -327,7 +339,8 @@ class grapPartFrame(wx.Frame):
 		minScale=1
 		mapSize=(im.Width,im.Height)
 		#print ("Mouse pos"+str(event.GetPosition()))
-		if self.GetSize()[0]<im.Width*0.2:
+
+		if self.GetSize()[0]<=minSize or self.GetSize()[1]<=minSize:
 			miniState=False
 			tim=im.Rescale(im.Width,im.Height)
 			self.bg.SetBitmap(wx.BitmapFromImage(tim))  
@@ -343,7 +356,7 @@ class grapPartFrame(wx.Frame):
 				minScale=minSize/im.Height
 				newSize=(int(im.Width*minScale),int(minSize))
 			else:
-				minScale=minSize/im.Height
+				minScale=minSize/im.Width
 				newSize=(int(minSize),int(im.Height*minScale))
 
 			tim=im.Rescale(int(im.Width*minScale),int(im.Height*minScale))
@@ -504,13 +517,14 @@ class grapPartFrame(wx.Frame):
 		print LOG
 
 	def saveData(self):
+		print MAIN_SETTINGS_TREE,self.name,self.miniState,self.pos,self.scale
+		print "xxx"
 		saveChange(MAIN_SETTINGS_TREE,self.name,self.miniState,self.pos,self.scale)
 
 #---<string> map path
 def createMap(mapPath,state,pos,scale):
-	global GRAP_RECT
-	global GRAP_NUM
-	GRAP_NUM+=1
+	
+
 
 	startPos=wx.Point=(pos)
 	tImage=wx.Image(mapPath,wx.BITMAP_TYPE_PNG)
@@ -523,7 +537,9 @@ def createMap(mapPath,state,pos,scale):
 	newFrame.pos=pos
 	newFrame.miniState=state
 	newFrame.scale=scale
-	newFrame.name=mapPath #os.path.basename(mapPath)
+	#name=os.path.basename(mapPath)
+	#print name 
+	newFrame.name=os.path.basename(mapPath)
 	newFrame.SetSize(mapSize)
 	#print startPos
 	newFrame.SetPosition(startPos)
@@ -534,16 +550,22 @@ def createMap(mapPath,state,pos,scale):
 	newFrame.bg.SetBitmap(wx.BitmapFromImage(tim))  
 	newFrame.SetSize(tSize)
 
-	
-	saveChange(MAIN_SETTINGS_TREE,mapPath,state,pos,scale)
+	'''
+	LOG=""
+	LOG+=mapPath+str(state)+str(pos)+str(scale)
+	print LOG
+	print mapPath,state,pos,scale 
+	'''
+
+	saveChange(MAIN_SETTINGS_TREE,newFrame.name,state,pos,scale)
 	newFrame.Show()
 	ALL_FRAME.append(newFrame)
 		
 def grap(box,sPath):
-	global GRAP_NUM
+
 	global SAVE_SCREEN_MAP_PATH
 	global GRAP_PF_NAME
-	global GRAP_RECT
+	
 
 	gTime=str(int(time.time()))
 	sPath=os.path.dirname(sPath)+"\\"+GRAP_PF_NAME+"_"+gTime+".png"
