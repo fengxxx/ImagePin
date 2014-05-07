@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: cp936 -*-
-
 import Image
 import win32api,win32con ,win32ui,win32gui
 from  xml.etree.ElementTree import*
 import wx
 import os,sys,time 
 import string
+import win32pdh
 
 ROOT_DIR=os.getcwd()
 #ROOT_DIR="K:\\temp\\screenGrap_Fengx\\"
@@ -17,21 +17,65 @@ GRAP_PF_NAME="ThreeKindom"
 CAN_GRAP=True
 
 GRAP_RECT=[1,1,2,2]
-GRAP_MAP_DATA={}
-GRAP_MAP_RECT={}
-
 
 # get the screen size (support multiply display)
-SCREEN_SIZE=(900,600)
 	
 	#get single display size 
 	#SCREEN_SIZE=(win32api.GetSystemMetrics(win32con.SM_CXSCREEN),win32api.GetSystemMetrics(win32con.SM_CYSCREEN))
 
-try:
+SCREEN_POS=(0,0)
+SCREEN_SIZE=(100,100)
+
+
+
+def GetProcessID( name ):
+    object = "Process"
+    items, instances = win32pdh.EnumObjectItems(None,None,object, win32pdh.PERF_DETAIL_WIZARD)
+    val = None
+    if name in instances :
+        hq = win32pdh.OpenQuery()
+        hcs = []
+        item = "ID Process"
+        path = win32pdh.MakeCounterPath( (None,object,name, None, 0, item) )
+        hcs.append(win32pdh.AddCounter(hq, path))
+        win32pdh.CollectQueryData(hq)
+        time.sleep(0.01)
+        win32pdh.CollectQueryData(hq)
+        for hc in hcs:
+            type, val = win32pdh.GetFormattedCounterValue(hc, win32pdh.PDH_FMT_LONG)
+            win32pdh.RemoveCounter(hc)
+            win32pdh.CloseQuery(hq)
+            return val
+
+def GetAllProcesses():
+	object = "Process"
+	items, instances = win32pdh.EnumObjectItems(None,None,object, win32pdh.PERF_DETAIL_WIZARD)
+	return instances
+
+
+
+#get screnPos and max size
+def getScreenSizePos():
+	global SCREEN_POS
+	global SCREEN_SIZE
 	MoniterDev=win32api.EnumDisplayMonitors(None,None)	
-	SCREEN_SIZE=(MoniterDev[len(MoniterDev)-1][2][2],MoniterDev[len(MoniterDev)-1][2][3])
-except:
-	SCREEN_SIZE=(900,600)
+	if len(MoniterDev)==1:
+		SCREEN_POS=(MoniterDev[1][2][0],MoniterDev[1][2][1])
+		SCREEN_SIZE=(MoniterDev[1][2][2],MoniterDev[1][2][3])
+
+	else:
+		ax=[]
+		ay=[]
+		bx=[]
+		by=[]
+		for s in MoniterDev:
+			ax.append(s[2][0])
+			ay.append(s[2][1])
+			ax.append(s[2][2])
+			ay.append(s[2][3]) 
+		SCREEN_POS=(min(ax),min(ay))
+		SCREEN_SIZE=((max(ax)-min(ax)),(max(ay)-min(ay)))
+
 
 
 #  -------------- xml
@@ -203,7 +247,11 @@ class TB_Icon(wx.TaskBarIcon):
 				print ""
 		
 	def closeApp(self, evt):
-		#self.saveData()
+		for s in ALL_FRAME:
+			try:
+				s.saveData()
+			except:
+				print "guo"
 		self.RemoveIcon()
 		#self.frame.Close()
 		sys.exit()
@@ -248,9 +296,10 @@ class grapingScreenFrame(wx.Frame):
 		self.bg.Bind(wx.EVT_LEFT_UP, self.OnLeftMouseUp)
 		self.bg.Bind(wx.EVT_LEFT_DOWN, self.OnLeftMouseDown)
 		self.bg.Bind(wx.EVT_MIDDLE_UP,  self.close)
+		self.bg.Bind(wx.EVT_RIGHT_DOWN,  self.close)
 		self.icon = wx.Icon(ICON_PATH, wx.BITMAP_TYPE_ICO)
 		self.SetIcon(self.icon)  
-		
+		self.SetPosition(SCREEN_POS)
 		#set icon
 		try:
 			self.tbicon = TB_Icon(self)
@@ -265,19 +314,21 @@ class grapingScreenFrame(wx.Frame):
 	def OnLeftMouseUp(self, event):
 		GRAP_RECT[2]= event.GetPosition()[0]
 		GRAP_RECT[3]= event.GetPosition()[1]
-		self.Hide()
-		grap(GRAP_RECT,SAVE_GRAP_MAP_PATH)
+		
+		minSize=45
+		if abs(GRAP_RECT[3]-GRAP_RECT[1])>=minSize and abs(GRAP_RECT[2]-GRAP_RECT[0])>=minSize: 
+			grap(GRAP_RECT,SAVE_GRAP_MAP_PATH)
+			self.Hide()
 		
 	def close(self,event):
 		self.Hide()
-		#self.Close()
 
 class grapPartFrame(wx.Frame):
 	global SCREEN_SIZE
-
+	global SCREEN_POS
 	name=""
 	miniState=False
-	pos=[0,0]
+	pos=SCREEN_POS
 	mousePos=[0,0]
 	scale=1
 	lastPos=[0,0]
@@ -299,8 +350,7 @@ class grapPartFrame(wx.Frame):
 		self.bg.Bind(wx.EVT_LEFT_DCLICK, self.OnMouseLeftDclick)
 		self.bg.Bind(wx.EVT_LEFT_DOWN, self.OnMouseLeftDown)
 		self.bg.Bind(wx.EVT_MOTION,  self.OnMove)
-		self.bg.Bind(wx.EVT_MIDDLE_UP,  self.close)
-		#self.bg.Bind(wx.EVT_MIDDLE_UP,  self.saveSet)
+		self.bg.Bind(wx.EVT_MIDDLE_UP,  self.onHide)
 		self.Bind(wx.EVT_MOUSEWHEEL, self.scaleMap)
 		self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 	   
@@ -333,7 +383,6 @@ class grapPartFrame(wx.Frame):
 
 	def OnMouseLeftDclick(self, event):  
 		im=wx.Image(self.name) 
-		miniState=True
 		newSize=(50,50)
 		minSize=60.0
 		minScale=1
@@ -341,7 +390,6 @@ class grapPartFrame(wx.Frame):
 		#print ("Mouse pos"+str(event.GetPosition()))
 
 		if self.GetSize()[0]<=minSize or self.GetSize()[1]<=minSize:
-			miniState=False
 			tim=im.Rescale(im.Width,im.Height)
 			self.bg.SetBitmap(wx.BitmapFromImage(tim))  
 			self.SetSize((im.Width,im.Height))
@@ -377,7 +425,7 @@ class grapPartFrame(wx.Frame):
 
 	def OnMouseLeftUp(self, event):
 		self.canMove=False
-		self.saveData()
+		#self.saveData()
 
 	def close(self,event):
 		self.Close()
@@ -387,6 +435,8 @@ class grapPartFrame(wx.Frame):
 		#self.Close()
 
 	def OnMove(self, event):
+		
+		#print IsShown(self)
 		newPosX=event.GetPosition()[0]-self.lastPos[0]+self.pos[0]
 		newPosY=event.GetPosition()[1]-self.lastPos[1]+self.pos[1]
 		newPos=wx.Point=(newPosX,newPosY)
@@ -430,10 +480,10 @@ class grapPartFrame(wx.Frame):
 		menu.Append(self.pp_CLOSE, "&Close")
 		menu.Append(self.pp_HIDE, "&Hide")
 		menu.Append(self.pp_DELETE, "&Delete")
-		sm = wx.Menu()
-		sm.Append(self.pp_TEST, "ThreeKindom")
-		sm.Append(self.pp_TEST, "ZHOU")
-		menu.AppendMenu(self.pp_TEST, "RuangJi", sm)
+		#sm = wx.Menu()
+		#sm.Append(self.pp_TEST, "ThreeKindom")
+		#sm.Append(self.pp_TEST, "ZHOU")
+		#menu.AppendMenu(self.pp_TEST, "RuangJi", sm)
 
 		self.PopupMenu(menu)
 		menu.Destroy()
@@ -476,9 +526,12 @@ class grapPartFrame(wx.Frame):
 
 		#dialog.destory()
 	def onClose(self, event):
+		self.saveData()
 		self.Close()
 
 	def onHide(self, event):
+		self.miniState=False
+		self.saveData()
 		self.Hide()
 
 	def onDelete(self, event):
@@ -506,27 +559,19 @@ class grapPartFrame(wx.Frame):
 			else:
 				newPath+=s
 		return newPath
-
-
-	def saveSet(self,event):
-		LOG="save data:\n"
-
-
-		saveChange(MAIN_SETTINGS_TREE,self.name,self.miniState,self.pos,self.scale)
-		LOG+="name:"+self.name+"\npos:"+str(self.pos)+"\nscale:"+str(self.scale)+"\nminiState:"+str(self.miniState)
-		print LOG
-
 	def saveData(self):
-		print MAIN_SETTINGS_TREE,self.name,self.miniState,self.pos,self.scale
-		print "xxx"
+		self.miniState=self.IsShown()
+		print "saveData",MAIN_SETTINGS_TREE,self.name,self.miniState,self.pos,self.scale
+		
 		saveChange(MAIN_SETTINGS_TREE,self.name,self.miniState,self.pos,self.scale)
 
 #---<string> map path
 def createMap(mapPath,state,pos,scale):
 	
 
-
 	startPos=wx.Point=(pos)
+	pos[0]+=SCREEN_POS[0]
+	pos[1]+=SCREEN_POS[1]
 	tImage=wx.Image(mapPath,wx.BITMAP_TYPE_PNG)
 	mapSize=tImage.GetSize()
 
@@ -537,6 +582,7 @@ def createMap(mapPath,state,pos,scale):
 	newFrame.pos=pos
 	newFrame.miniState=state
 	newFrame.scale=scale
+	
 	#name=os.path.basename(mapPath)
 	#print name 
 	newFrame.name=os.path.basename(mapPath)
@@ -558,27 +604,31 @@ def createMap(mapPath,state,pos,scale):
 	'''
 
 	saveChange(MAIN_SETTINGS_TREE,newFrame.name,state,pos,scale)
-	newFrame.Show()
+	if state:
+		newFrame.Show()
+	else:
+		newFrame.Hide()
 	ALL_FRAME.append(newFrame)
 		
 def grap(box,sPath):
 
 	global SAVE_SCREEN_MAP_PATH
 	global GRAP_PF_NAME
-	
+	minSize=40
+	if abs(box[2]-box[0])>=minSize and abs(box[3]-box[1])>=minSize:
+		gTime=str(int(time.time()))
+		sPath=os.path.dirname(sPath)+"\\"+GRAP_PF_NAME+"_"+gTime+".png"
 
-	gTime=str(int(time.time()))
-	sPath=os.path.dirname(sPath)+"\\"+GRAP_PF_NAME+"_"+gTime+".png"
-	
-	im = Image.open(SAVE_SCREEN_MAP_PATH)
-	imSize=()
-	cim=Image.new('RGB',(abs(box[2]-box[0]),abs(box[3]-box[1])))
-	region = im.crop(box)
-	cim.paste(region, (0,0))
-	cim.save(sPath)
-	createMap(sPath,False,[box[0],box[1]],1)
+		im = Image.open(SAVE_SCREEN_MAP_PATH)
+		imSize=()
+		cim=Image.new('RGB',(abs(box[2]-box[0]),abs(box[3]-box[1])))
+		region = im.crop(box)
+		cim.paste(region, (0,0))
+		cim.save(sPath)
+		createMap(sPath,True,[box[0],box[1]],1)
 
 def screenCapture(savePath,size):
+	getScreenSizePos()
 	global SAVE_SCREEN_MAP_PATH
 
 	hwnd = 0  
@@ -588,13 +638,12 @@ def screenCapture(savePath,size):
 	saveBitMap = win32ui.CreateBitmap()
 	saveBitMap.CreateCompatibleBitmap(mfcDC, size[0], size[1])   
 	saveDC.SelectObject(saveBitMap)   
-	saveDC.BitBlt((0,0),(size[0], size[1]) , mfcDC, (0,0), win32con.SRCCOPY)  
-	
-
+	saveDC.BitBlt((0,0),SCREEN_SIZE, mfcDC, SCREEN_POS, win32con.SRCCOPY)  
 	saveBitMap.SaveBitmapFile(saveDC,SAVE_SCREEN_MAP_PATH)  
 	Image.open(SAVE_SCREEN_MAP_PATH).save(SAVE_SCREEN_MAP_PATH[:-4]+".png")  
 
 def grapStart(bmp):
+	getScreenSizePos()
 	global SCREEN_SIZE
 	global SAVE_SCREEN_MAP_PATH
 	screenCapture(SAVE_SCREEN_MAP_PATH,SCREEN_SIZE)
@@ -604,6 +653,8 @@ def grapStart(bmp):
 
 		
 def start():
+	getScreenSizePos()
+
 	global ROOT_DIR
 	LOG=""
 	files= os.listdir(ROOT_DIR)
@@ -615,7 +666,10 @@ def start():
 				tTree=MAIN_SETTINGS_TREE.find(os.path.basename(m))
 				LOG+="\nname: "+m
 				try:
-					miniState=bool(tTree.find("miniState").text)
+					if tTree.find("miniState").text=="False":
+						miniState=False
+					else:
+						miniState=True
 					pos=[int(tTree.find("posx").text),int(tTree.find("posy").text)]
 					scale=float(tTree.find("scale").text)
 					LOG+="\nload data... : \npos:"+str(pos)+"\nscale: "+str(scale)+"\nminiState: "+str(miniState)
@@ -626,8 +680,24 @@ def start():
 					scale=1
 					LOG+="\nload fath! set defult data... : \npos:"+str(pos)+"\nscale: "+str(scale)+"\nminiState: "+str(miniState)
 				createMap(m,miniState,pos,scale)
-				print LOG
+				#print LOG
+	#for s in ALL_FRAME:
+	#	s.saveData()
 
+
+softOn=True
+
+i=0
+if softOn:
+	for s in  GetAllProcesses():
+		softOn=False
+		if s=="ImagePin":
+			i+=1
+	if i>2:
+		sys.close()
+
+
+getScreenSizePos()
 ALL_FRAME=[]
 mainApp = wx.PySimpleApp()
 bmp=wx.EmptyBitmap(10,10, depth=-1)
@@ -636,5 +706,6 @@ mainFrame.bg.SetBitmap(bmp)
 start()
 
 mainApp.MainLoop()
+
 #---------global key
 
