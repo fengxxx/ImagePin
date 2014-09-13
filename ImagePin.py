@@ -98,8 +98,8 @@ def getScreenSizeAndPos():
     screenPS=[[0,0],[0,0]]
     MoniterDev=win32api.EnumDisplayMonitors(None,None)    
     if len(MoniterDev)==1:
-        screenPS[0]=(MoniterDev[1][2][0],MoniterDev[1][2][1])
-        screenPS[1]=(MoniterDev[1][2][2],MoniterDev[1][2][3])
+        screenPS[0]=(MoniterDev[0][2][0],MoniterDev[0][2][1])
+        screenPS[1]=(MoniterDev[0][2][2],MoniterDev[0][2][3])        
     else:
         ax=[]
         ay=[]
