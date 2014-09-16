@@ -21,6 +21,11 @@ helpInfor_EN='''
     |  inversion image (show/hide)      |   CTRL    +    U       |                         |
     |  isolation image (show/hide)      |   ALT     +    Q       |                         |
     |                                   |                        |                         |
+    |  show in explorer                 |   CTRL     +   D       |                         |
+    |  rename image                     |   F2                   |                         |
+    |  close image                      |   CTRL    +    W       |                         |
+    |  save image                       |   CTRL    +    S       |                         |
+    |                                   |                        |                         |
     |  hide image                       |   CTRL    +    H       |    mosue wheel kick     |
     |  image Zoom In                    |   +                    |    mouse wheel roll +   |
     |  image Zoom Out                   |   -                    |    mouse wheel roll -   |
@@ -41,7 +46,12 @@ helpInfor_CN='''
        删除图片到备份文件夹                 Delete                                          
        反向图片的(显示/隐藏)                CTRL    +    U                                  
        单独显示图片 (显示/恢复)             ALT     +    Q                                  
-                                                                                            
+
+       显示文件位置                         CTRL     +   D                                  
+       重命名图片                           F2                                     
+       关闭图片                             CTRL    +    W                      
+       储存图片                             CTRL    +    S                      
+       
        隐藏图片                             CTRL    +    H            鼠标中键单机          
        放大图片                             +                         鼠标滚轮              
        缩小图片                             -                         鼠标滚轮              
@@ -52,48 +62,54 @@ helpInfor_CN='''
        图片文件拖上已显示的图片快速创建     PNG BMP JPG TGA                                 
     |-----------------------------------|-------------------------|-------------------------|
  '''
-EN_Dic = {"grap"              :    "&Grap         -Ctrl+Shift+Alt+A",
-    "save"                    :    "&Save",
-    "help"                    :    "&help         -F1",
+EN_Dic = {"grap"              :    "&Grap                -Ctrl+Shift+Alt+A",
+    "save"                    :    "&Save as                           -Ctrl+S",
+    "help"                    :    "&help                                 -F1",
     "show"                    :    "&Show",
-    "hide"                    :    "&Hide         -Ctr+H",
-    "show_all_windows"        :    "Show All Window",
+    "hide"                    :    "&Hide                               -Ctr+H",
+    "show_all_windows"        :    "Show All Window    -Ctrl+Shift+H",
     "hide_all_windows"        :    "Hide All Window",
-    "close"                   :    "&Close",
-    "delete"                  :    "&Delete       -Delete",
+    "close"                   :    "&Close                              -Ctrl+C",
+    "delete"                  :    "&Delete                             -Delete",
     "exit"                    :    "&Exit",
     "delete_all_images"       :    "Delete All &Images",
-    "show_in_explorer"        :    "Show In &Explorer",
+    "show_in_explorer"        :    "Show In &Explorer             -Ctrl+D",
     "reset_position"          :    "&Reset Position",
-    "hide_others"             :    "Hide &Others",
+    "hide_others"             :    "Hide &Others                     -Alt+H",
     "help_infor"              :    helpInfor_EN,
     "imagepin_tip"            :    "ImagePin by fengx - zengme@gmail.com",
     "menu_EN"                 :    u"English 英文",
-    "menu_CN"                 :    u"Chinese 中文"
+    "menu_CN"                 :    u"Chinese 中文",
+    "rename"                  :    u"Rename                               -F2",
+    "menu_reName_tip"         :    u"Write a new name: ",
+    "menu_reName_pre"         :    u"Name:  "
     
 }
     
-CN_Dic={"grap"                :    "抓取         -Ctrl+Shift+Alt+A",
-    "save"                    :    "存储",
-    "help"                    :    "帮助         -F1",
+CN_Dic={"grap"                :    "抓取       -Ctrl+Shift+Alt+A",
+    "save"                    :    "另存为                  -Ctrl+S",
+    "help"                    :    "帮助                        -F1",
     "show"                    :    "显示",
-    "hide"                    :    "隐藏         -Ctr+H",
-    "show_all_windows"        :    "显示所有",
+    "hide"                    :    "隐藏                     -Ctr+H",
+    "show_all_windows"        :    "显示所有      -Ctrl+Shift+H",
     "hide_all_windows"        :    "隐藏所有",
-    "close"                   :    "关闭",
-    "delete"                  :    "删除         -Delete",
+    "close"                   :    "关闭                     -Ctrl+C",
+    "delete"                  :    "删除                     -Delete",
     "exit"                    :    "退出",
     "delete_all_images"       :    "删除所有图片",
-    "show_in_explorer"        :    "显示所在文件夹",
+    "show_in_explorer"        :    "显示所在文件夹      -Ctrl+D",
     "reset_position"          :    "复位所有图片位置",
-    "hide_others"             :    "隐藏其他",
+    "hide_others"             :    "隐藏其他                -Alt+H",
     "help_infor"              :    helpInfor_CN,
     "imagepin_tip"            :    "ImagePin by fengx - zengme@gmail.com",
     "menu_EN"                 :    u"英文 English",
-    "menu_CN"                 :    u"中文 Chinese"
+    "menu_CN"                 :    u"中文 Chinese",
+    "rename"                 :    u"重命名                        -F2",
+    "menu_reName_tip"         :    u"输入新名字: ",
+    "menu_reName_pre"         :    u"名字:  "
 }
 
-LANGUAGE_TYPE=1
+LANGUAGE_TYPE=0
 
 LANGUAGE_PACK_ALL=[EN_Dic,CN_Dic]
 #LANGUAGE_PACK=LANGUAGE_PACK_ALL[LANGUAGE_TYPE]
@@ -102,7 +118,7 @@ ROOT_DIR=os.getcwd()
 ICON_PATH=ROOT_DIR+"\\app.ico"
 SAVE_SCREEN_MAP_PATH=ROOT_DIR+"\\screen.png"
 SET_FILE_PATH="sttings.fengx"
-GRAP_PF_NAME="ThreeKindom"
+GRAP_PF_NAME="fengx"
 
 CAN_GRAP=True
 GRAP_RECT=[1,1,2,2]
@@ -155,13 +171,21 @@ def getScreenSizeAndPos():
             ay.append(s[2][3]) 
         screenPS[0]=(min(ax),min(ay))
         screenPS[1]=((max(ax)-min(ax)),(max(ay)-min(ay)))
+    print "\nscrenRect: ",screenPS
     return screenPS
 
-#  -------------- xml
-def grapPartElement(n,s,p,sc):
-    gpe=Element(n)
+#  -------------- xmlz
+def grapPartElement(n,s,p,sc,filePath):
+    gpe=Element("image")
     name=Element("name")
-    name.text=n
+    if n=="":
+        name.text=filePath
+    else:
+        name.text=n
+        
+    path=Element("path")
+    path.text=filePath
+    
     miniState=Element("miniState")
     miniState.text=str(s)
     scale=Element("scale")
@@ -171,6 +195,7 @@ def grapPartElement(n,s,p,sc):
     posy=Element("posy")
     posy.text=str(p[1])
     gpe.append(name)
+    gpe.append(path)
     gpe.append(miniState)
     gpe.append(posx)
     gpe.append(posy)
@@ -195,31 +220,45 @@ def indent(elem, level=0):
 def createSetingsFile():
     global ROOT_DIR
     global GRAP_PF_NAME
-    item=Element("root")
-    t=Element("images")
+    main_element=Element("root")
+    images_element=Element("images")
+    images_element.text="imagePin"
     files= os.listdir(ROOT_DIR)
-    #fElement=[]
+    haveImage=False
+    print files
     for m in files:
         nameParts=os.path.basename(m).split("_") 
         if nameParts[0]==GRAP_PF_NAME:
             if os.path.splitext(m)[1]==".png":
-                t.append(grapPartElement(m,True,[10,10],1))
+                #image_element.text=m
+                haveImage=True
+                images_element.append(grapPartElement(m,True,[10,10],1,m))
     settings=ElementTree("fengxx")
-    item.append(t)
-    settings._setroot(indent(item))
+    main_element.append(images_element)
+    settings._setroot(indent(main_element))
     settings.write(SET_FILE_PATH,"utf-8")
+    print "\ncreateSetingsFile: ", SET_FILE_PATH
 #--- save settings
-def saveChange(mainTree,name,s,pos,sc):
+def saveChange(mainTree,name,s,pos,sc,filePath):
     global SET_FILE_PATH
-    sTree=grapPartElement(name,s,pos,str(sc))
-    if mainTree.find("images").find(name)!=None:
-        mainTree.find("images").remove(mainTree.find("images").find(name))
-    mainTree.find("images").append(sTree)
+    sTree=grapPartElement(name,s,pos,str(sc),filePath)
+    changeOn=False
+    for s in mainTree.findall("images/image"):
+        if s.find("path").text==filePath:
+            s.find("path").text=sTree.find("path").text
+            s.find("name").text=sTree.find("name").text
+            s.find("miniState").text=sTree.find("miniState").text
+            s.find("posx").text=sTree.find("posx").text
+            s.find("posy").text=sTree.find("posy").text
+            s.find("scale").text=sTree.find("scale").text
+            changeOn=True
+    if changeOn==False:
+        mainTree.find("images/image").append(sTree)
     settings=ElementTree("root")
     settings._setroot(indent(mainTree))
     settings.write(SET_FILE_PATH,"utf-8")
 
-     
+    print "\nsaveChange: ",name
 def save_settings_data(mainTree,data):
     for s in data:
         if mainTree.find(s)!=None:
@@ -254,10 +293,10 @@ def save_settings_data(mainTree,data):
         settings=ElementTree("root")
         settings._setroot(indent(mainTree))
         settings.write(SET_FILE_PATH,"utf-8")
-        
-  
-  
+        print "\n save_settings_data: "
+
 def get_settings_data(mainTree,data):
+    print "start get data: \n"
     for e in mainTree:
         s=e.tag
         try: e.text
@@ -274,26 +313,8 @@ def get_settings_data(mainTree,data):
                             settings_data[n]=float(e.text)
                         elif s=="LANGUAGE_TYPE" :
                             settings_data[n]=int(e.text)
-                        
-   
-'''
-        if s=="ICON_PATH" or s=="SAVE_SCREEN_MAP_PATH" or s=="SET_FILE_PATH" or s=="GRAP_PF_NAME"  or s=="GRAP_PF_NAME" :
-            
-            exec((s+"="+e.text))
-        #int
-        elif s=="LANGUAGE_TYPE" or s=="IMAGE_MAX_SIZE" or s== "IMAGE_MIN_SIZE":
-            exec((s+"="+e.text))
-        #float
-        elif s=="ADJUST_SCALE_SPEED" or s=="SCALE_SPEED" :
-            exec((s+"="+e.text))
-        #array
-        elif s=="IMAGE_SCALE_MIN_MAX" :  
-            exec((s+"="+e.text))
-        '''
-   
-  
-  
-  
+    print "\nget data complit! \n"
+
 SCREEN_POS,SCREEN_SIZE=getScreenSizeAndPos()
 #--- get XML settings file Root 
 if  os.path.isfile(SET_FILE_PATH)==False:
@@ -302,7 +323,6 @@ MAIN_SETTINGS_TREE=ElementTree(file=SET_FILE_PATH).getroot()
 get_settings_data(MAIN_SETTINGS_TREE,settings_data)
 
 LANGUAGE_PACK=LANGUAGE_PACK_ALL[settings_data["LANGUAGE_TYPE"]]
-print "xx" , settings_data["LANGUAGE_TYPE"]
 
 class MyFileDropTarget(wx.FileDropTarget):
     def __init__(self, window,pos):
@@ -314,24 +334,25 @@ class MyFileDropTarget(wx.FileDropTarget):
         for f in filenames:
             fileE=os.path.splitext(f)[1]
             file_types=[".png",".PNG",".jpg",".JPG",".tga",".TGA",".bmp",".BMP"]
+            importOn=False
             for s in file_types:
+                
                 if fileE==s:
                     i+=1
                     im = Image.open(f)
-                    mapName="ThreeKindom_"+str(i)+"_"+str(int(time.time()))+".png"
+                    mapName=GRAP_PF_NAME+"_"+str(i)+"_"+str(int(time.time()))+".png"
                     im.save(mapName,format="png")
                     print "import  image  succeed: " ,f
-                    createMap(mapName,True,[self.pos[0]*0.33,self.pos[1]*0.33],1)
-                else:
-                    print "import image  failure: ",f
-
+                    importOn=True
+                    createMap(mapName,True,[self.pos[0]*0.33,self.pos[1]*0.33],1,mapName)
+            if importOn==False: print "import image  failure: ",f
+            
 
 class helpFrame(wx.Frame):
     global LANGUAGE_TYPE,MAIN_SETTINGS_TREE ,settings_data
-    print LANGUAGE_TYPE
     def __init__(self, parent,id):
         global LANGUAGE_TYPE
-        helpSize=(900,358)
+        helpSize=(900,420)
         windowSize=(helpSize[0],(helpSize[1]+120))
         wx.Frame.__init__(self, parent, id, 'ImagePin_help', size=windowSize,style=wx.DEFAULT_FRAME_STYLE)
         self.SetBackgroundColour((67,67,67))
@@ -341,55 +362,17 @@ class helpFrame(wx.Frame):
         help_text.SetFont(font)
         help_text.SetForegroundColour((29,29,29))
         help_text.SetBackgroundColour((75,75,75))
-        # self.b_CN = wx.RadioButton(self.main_P, -1, u"Chinese 中文",(300, (helpSize[1]+20)), (150, 20), style = wx.RB_GROUP )
-        # self.b_EN = wx.RadioButton(self.main_P, -1, u"English 英文",(450, (helpSize[1]+20)), (150, 20), style = wx.RB_GROUP )
-        # self.b_EN.SetForegroundColour((80,80,80))
   
         fengx_text=wx.StaticText(self.main_P, -1, LANGUAGE_PACK["imagepin_tip"])#, pos=(0,0),size=helpSize)
         fengx_text.SetForegroundColour((45,45,45))
-
-        #grid = wx.FlexGridSizer( cols=2 )
         box1_title = wx.StaticBox( self.main_P, -1, " " )
         box1 = wx.StaticBoxSizer( box1_title, wx.VERTICAL, )
-        # box2 = wx.StaticBoxSizer( box1_title, wx.VERTICAL, )
-        # #grid2 = wx.FlexGridSizer( cols=2 )
-        # #grid.Add( self.b_CN, 0, wx.ALIGN_CENTRE|wx.LEFT|wx.RIGHT|wx.TOP, 0 )
-        # #grid.Add( self.b_EN, 0, wx.ALIGN_CENTRE|wx.LEFT|wx.RIGHT|wx.TOP, 0 )
-        # box2.Add( self.b_CN, 0, wx.ALIGN_CENTRE|wx.ALL, 5 )
-        # box2.Add( self.b_EN, 0, wx.ALIGN_CENTRE|wx.ALL, 5 )
-        
-        # box1.Add( box2, 0, wx.ALIGN_CENTRE|wx.ALL, 5 )
         
         box1.Add( help_text, 0, wx.ALIGN_CENTRE|wx.ALL, 5 )
         box1.Add( fengx_text, 0, wx.ALIGN_CENTRE|wx.ALL, 5 )
         self.main_P.SetSizer(box1)
         box1.Fit( self.main_P )
         
-        # self.Bind(wx.EVT_RADIOBUTTON, self.OnGroup1Select, self.b_EN ) 
-        # self.Bind(wx.EVT_RADIOBUTTON, self.OnGroup1Select, self.b_CN )
-
-        
-        # if LANGUAGE_TYPE==1:
-            # self.b_EN.SetValue(0)
-            # self.b_EN.SetValue(1)
-        # else:
-            # self.b_EN.SetValue(1)
-            # self.b_EN.SetValue(0)         
-  
-  
-    # def OnGroup1Select( self, event ):
-        # global LANGUAGE_TYPE
-        # radio_selected = event.GetEventObject()
-        # #radio_selected.Enable=False
-        # if self.b_CN is radio_selected:
-            # self.b_EN.SetValue(0)
-            # LANGUAGE_TYPE=1
-            # print "LANGUAGE_TYPE: ",LANGUAGE_TYPE
-        # elif self.b_EN is radio_selected:
-            # self.b_CN.SetValue(0)
-            # LANGUAGE_TYPE=0
-            # print "LANGUAGE_TYPE: ",LANGUAGE_TYPE
-        # save_settings_data(MAIN_SETTINGS_TREE,settings_data)
 # tabbar icon class
 class TB_Icon(wx.TaskBarIcon):
     global ICON_PATH
@@ -397,6 +380,7 @@ class TB_Icon(wx.TaskBarIcon):
     global settings_data
     global LANGUAGE_TYPE
     global MAIN_SETTINGS_TREE
+    global imagePinFrame
     m_close=wx.NewId()
     m_seting=wx.NewId()
     m_hide=wx.NewId()
@@ -456,7 +440,8 @@ class TB_Icon(wx.TaskBarIcon):
 
 
     def OnTaskBarActivate(self, evt):
-        grapStart(bmp)
+        imagePinFrame.Show()
+        #grapStart(bmp)
         '''
         if self.frame.IsIconized():
             self.frame.Iconize(False)
@@ -523,6 +508,7 @@ class TB_Icon(wx.TaskBarIcon):
                 ()
     
     def closeApp(self, evt):
+        imagePinFrame.saveData()
         for s in ALL_FRAME:
             try:
                 s.saveData()
@@ -847,7 +833,8 @@ class grapPartFrame(wx.Frame):
     #global LANGUAGE_TYPE
     global TEST_FRAME
     
-    name=""
+    name="no name"
+    path="imagePin.png"
     isolation=False
     miniState=False
     hide=False
@@ -861,7 +848,7 @@ class grapPartFrame(wx.Frame):
     log="ss"
     ID=0
     
-    def __init__(self, parent, id):
+    def __init__(self, parent, id,imagePath):
         wx.Frame.__init__(self, parent, id, 'fengx', size=SCREEN_SIZE,style=wx.NO_BORDER|wx.STAY_ON_TOP|wx.FRAME_NO_TASKBAR|wx.FRAME_SHAPED)
         tBmp=wx.EmptyBitmap(600,600, depth=-1)
         self.bg=wx.StaticBitmap(self,-1,  tBmp, (0,0))
@@ -877,7 +864,7 @@ class grapPartFrame(wx.Frame):
         self.bg.Bind(wx.EVT_LEFT_DCLICK, self.OnMouseLeftDclick)
         self.bg.Bind(wx.EVT_MIDDLE_UP,  self.onHide)
         self.Bind(wx.EVT_MOUSEWHEEL, self.scaleMap)
-            
+        self.path=imagePath
         
     def SetWindowShape(self, bbmp):
         r = wx.RegionFromBitmap(bbmp)
@@ -903,7 +890,7 @@ class grapPartFrame(wx.Frame):
             self.dc.DrawBitmap(bbmp, 0,0, True)
 
     def resizeMap(self,sc):
-        im=wx.Image(self.name)
+        im=wx.Image(self.path)
         size=im.GetSize()
         maxPix=min(size)*self.scale
         minPix=min(size)*self.scale
@@ -919,51 +906,50 @@ class grapPartFrame(wx.Frame):
 
     def scaleMap(self,event):
         global SCREEN_SIZE
-        im=wx.Image(self.name)
+        im=wx.Image(self.path)
         size=im.GetSize()
-        if event.GetWheelRotation()<0 and self.name!="imagePin.png" :
+        if event.GetWheelRotation()<0 and self.path!="imagePin.png" :
             if  self.scale*size[0]>IMAGE_MIN_SIZE and self.scale*size[1]>IMAGE_MIN_SIZE:
                 self.scale=self.scale*(1-SCALE_SPEED)
                 self.resizeMap(self.scale)
-        elif  self.name!="imagePin.png": 
+        elif  self.path!="imagePin.png": 
             if  self.scale*size[0]< SCREEN_SIZE[0]*1.4 and self.scale*size[1]< SCREEN_SIZE[1]*1.4:
                 self.scale=self.scale*(1+SCALE_SPEED)
                 self.resizeMap(self.scale)
 
     def OnMouseLeftDclick(self, event):  
-        im=wx.Image(self.name) 
-        newSize=(50,50)
-        minSize=60.0
-        minScale=1
-        mapSize=(im.Width,im.Height)
-        if self.GetSize()[0]<=minSize or self.GetSize()[1]<=minSize:
-            tim=im.Rescale(im.Width,im.Height)
-            self.bg.SetBitmap(wx.BitmapFromImage(tim))  
-            self.SetSize((im.Width,im.Height))
-            newPos=[int(self.pos[0]+event.GetPosition()[0]-mapSize[0]/2),int(self.pos[1]+event.GetPosition()[1]-mapSize[1]/2)]
-            self.SetPosition(newPos)
-            self.pos=newPos
-            self.scale=1
-            
-        else:
-            if im.Width>=im.Height:
-                minScale=minSize/im.Height
-                newSize=(int(im.Width*minScale),int(minSize))
+        if self.path!="imagePin.png":
+            im=wx.Image(self.path) 
+            newSize=(50,50)
+            minSize=60.0
+            minScale=1
+            mapSize=(im.Width,im.Height)
+            if self.GetSize()[0]<=minSize or self.GetSize()[1]<=minSize:
+                tim=im.Rescale(im.Width,im.Height)
+                self.bg.SetBitmap(wx.BitmapFromImage(tim))  
+                self.SetSize((im.Width,im.Height))
+                newPos=[int(self.pos[0]+event.GetPosition()[0]-mapSize[0]/2),int(self.pos[1]+event.GetPosition()[1]-mapSize[1]/2)]
+                self.SetPosition(newPos)
+                self.pos=newPos
+                self.scale=1
+                
             else:
-                minScale=minSize/im.Width
-                newSize=(int(minSize),int(im.Height*minScale))
+                if im.Width>=im.Height:
+                    minScale=minSize/im.Height
+                    newSize=(int(im.Width*minScale),int(minSize))
+                else:
+                    minScale=minSize/im.Width
+                    newSize=(int(minSize),int(im.Height*minScale))
 
-            tim=im.Rescale(int(im.Width*minScale),int(im.Height*minScale))
-            self.bg.SetBitmap(wx.BitmapFromImage(tim))  
-            self.SetSize(newSize)
-            newPos=[int(self.pos[0]+event.GetPosition()[0]-minSize/2),int(self.pos[1]+event.GetPosition()[1]-minSize/2)]#[int(self.pos[0]+mapSize[0]/2),int(self.pos[1]+mapSize[1]/2)]
-            self.SetPosition(newPos)
+                tim=im.Rescale(int(im.Width*minScale),int(im.Height*minScale))
+                self.bg.SetBitmap(wx.BitmapFromImage(tim))  
+                self.SetSize(newSize)
+                newPos=[int(self.pos[0]+event.GetPosition()[0]-minSize/2),int(self.pos[1]+event.GetPosition()[1]-minSize/2)]#[int(self.pos[0]+mapSize[0]/2),int(self.pos[1]+mapSize[1]/2)]
+                self.SetPosition(newPos)
 
-            self.pos=newPos
-            self.scale=minScale
-            self.saveData()
-        #z,g,b,a = Image(self.name).split()
-        #print a
+                self.pos=newPos
+                self.scale=minScale
+                self.saveData()
         self.SetWindowShape(wx.BitmapFromImage(tim))
 
     def OnMouseLeftDown(self, event):
@@ -975,7 +961,7 @@ class grapPartFrame(wx.Frame):
         self.canMove=False
 
     def close(self,event):
-        if self.name!="imagePin.png":
+        if self.path!="imagePin.png":
             self.Close()
 
     def OnMouseRightDown(self, event):
@@ -1012,6 +998,7 @@ class grapPartFrame(wx.Frame):
             self.pp_SHOWINEXPLORER=wx.NewId()
             
             self.pp_test=wx.NewId()
+            self.pp_RENAME=wx.NewId()
             
             self.Bind(wx.EVT_MENU, self.onSave, id=self.pp_SAVE)
             self.Bind(wx.EVT_MENU, self.onClose, id=self.pp_CLOSE)
@@ -1023,26 +1010,42 @@ class grapPartFrame(wx.Frame):
             self.Bind(wx.EVT_MENU, self.grapScreen, id=self.pp_GRAP)
             self.Bind(wx.EVT_MENU, self.showFrameManager, id=self.pp_FRAMEMANAGER)
             self.Bind(wx.EVT_MENU, self.showInExplorer, id=self.pp_SHOWINEXPLORER)
+            self.Bind(wx.EVT_MENU, self.reName, id=self.pp_RENAME)
         
         
         
+        bmp=wx.BitmapFromIcon(wx.Icon(os.getcwd()+'\\App.ico'))
         menu = wx.Menu()
+        if self.path!="imagePin.png":
+            menu.Append(self.pp_RENAME, (LANGUAGE_PACK["menu_reName_pre"]+self.name))
+            menu.AppendSeparator()
+        # menu.Append(self.pp_test, self.name)
+            menu.Append(self.pp_RENAME, (LANGUAGE_PACK["rename"]))#+"--- "+self.name))
+        menu.AppendSeparator()
         menu.Append(self.pp_GRAP,LANGUAGE_PACK["grap"])
-        if self.name!="imagePin.png":
+        menu.Append(self.pp_SHOWINEXPLORER, LANGUAGE_PACK["show_in_explorer"])
+        menu.Append(self.pp_HIDE, LANGUAGE_PACK["hide"])
+        menu.Append(self.pp_HIDE_OTHER, LANGUAGE_PACK["hide_others"])
+        menu.Append(self.pp_SHOW_ALL, LANGUAGE_PACK["show_all_windows"])
+        if self.path!="imagePin.png":
+            menu.AppendSeparator()
             item = wx.MenuItem(menu, self.pp_SAVE,LANGUAGE_PACK["save"])
             menu.AppendItem(item)
             menu.Append(self.pp_CLOSE, LANGUAGE_PACK["close"])
             menu.Append(self.pp_DELETE, LANGUAGE_PACK["delete"])
-        bmp=wx.BitmapFromIcon(wx.Icon(os.getcwd()+'\\App.ico'))
-        #menu.Append(self.pp_FRAMEMANAGER,"&Show Frame Manager")
-        menu.Append(self.pp_SHOWINEXPLORER, LANGUAGE_PACK["show_in_explorer"])
-        menu.Append(self.pp_HIDE_OTHER, LANGUAGE_PACK["hide_others"])
-        menu.Append(self.pp_SHOW_ALL, LANGUAGE_PACK["show_all_windows"])
-        menu.Append(self.pp_HIDE, LANGUAGE_PACK["hide"])
 
-        menu.Append(self.pp_test, self.name)
         self.PopupMenu(menu)
         menu.Destroy()
+    def reName(self, evt):
+        dlg = wx.TextEntryDialog(
+                self, LANGUAGE_PACK["menu_reName_tip"],
+                LANGUAGE_PACK["rename"], "imagePin")
+        dlg.SetValue(self.name)
+
+        if dlg.ShowModal() == wx.ID_OK:
+            print "rename : ",self.name,"to : ",dlg.GetValue()
+            self.name=dlg.GetValue()
+        dlg.Destroy()
 
     def grapScreen(self, evt):
         grapStart(bmp)
@@ -1051,14 +1054,17 @@ class grapPartFrame(wx.Frame):
         wildcard = "png (*.png)|*.png|bmp (*.bmp)|*.bmp|tga (*.tga)|*.tga|jpg (*.jpg)|*.jpg|"     \
         "All files (*.*)|*.*"
         dialog=wx.FileDialog(self, message="Save file as ...", defaultDir=os.getcwd(), 
-        defaultFile=self.name, wildcard=wildcard,style=wx.SAVE)
-        tPath=os.path.dirname(self.name) 
-        tPath=ROOT_DIR+"\\"+self.name
+        
+         defaultFile=self.name, wildcard=wildcard,style=wx.SAVE)
+        
+        tPath=os.path.dirname(self.path) 
+        tPath=ROOT_DIR+"\\"+self.path
         if dialog.ShowModal()==wx.ID_OK:
-            im = Image.open(self.name)
-            file_et=os.path.splitext(dialog.GetPath())[1]
-            im.save(dialog.GetPath(),format=file_et)
-        dialog.destory()
+            im = Image.open(self.path)
+            #file_et=os.path.splitext(dialog.GetPath())[1]
+            im.save(dialog.GetPath())#,format=file_et)
+            print "save ",self.name," to  : ",dialog.GetPath()
+        dialog.Destroy()
 
     def onClose(self, event):
         ALL_FRAME.remove(self)
@@ -1076,9 +1082,9 @@ class grapPartFrame(wx.Frame):
         ALL_FRAME.remove(self)
         if os.path.isdir("backup")!=True:
             os.mkdir("backup")
-        c="move "+self.name+" "+("backup\\"+self.name)
+        c="move "+self.path+" "+("backup\\"+self.path)
         os.system(c)
-        #os.remove(self.name)
+        #os.remove(self.path)
         self.Close()
 
     def showALL_FRAME(self,evt):
@@ -1125,7 +1131,7 @@ class grapPartFrame(wx.Frame):
     def saveData(self):
         self.miniState=self.IsShown()
         #print "save: " ,LANGUAGE_TYPE
-        saveChange(MAIN_SETTINGS_TREE,self.name,self.miniState,self.pos,self.scale)
+        saveChange(MAIN_SETTINGS_TREE,self.name,self.miniState,self.pos,self.scale,self.path)
         #print "save: " ,SCALE_SPEED
         
     def showFrameManager(self,event):
@@ -1143,7 +1149,8 @@ class grapPartFrame(wx.Frame):
         ctrldown = evt.ControlDown()
         shiftdown = evt.ShiftDown()
         altdown = evt.AltDown()
-        #print (keycode)#,ctrldown
+        #print (keycode)
+        #,ctrldown
         #print wx.WXK_CONTROL_V
         '''
         72 H
@@ -1153,6 +1160,10 @@ class grapPartFrame(wx.Frame):
         45 -
         61 +
         85 u
+        341    F2
+        83     S
+        68     D
+        67     C
          '''
         if 32<=keycode<=126:  
             
@@ -1162,13 +1173,12 @@ class grapPartFrame(wx.Frame):
                 if wx.TheClipboard.GetData(clipBitmap):
                     wx.TheClipboard.Close()    
                     a=random.randint(0, 10000)
-                    mapName="ThreeKindom_"+str(a)+"_"+str(int(time.time()))+".png"
+                    mapName=GRAP_PF_NAME+"_"+str(a)+"_"+str(int(time.time()))+".png"
                     clipBitmap.GetBitmap().ConvertToImage().SaveFile(mapName,wx.BITMAP_TYPE_PNG)
-                    createMap(mapName,True,[(self.pos[0]+7),(self.pos[1]+7)],1)
+                    createMap(mapName,True,[(self.pos[0]+7),(self.pos[1]+7)],1,mapName)
                     print "paste image from clipboard! "
-
-            if keycode == 67 and ctrldown and os.path.isfile(self.name) and wx.TheClipboard.Open() and self.name!="imagePin.png":
-                setClipBitmap = wx.BitmapDataObject(wx.Bitmap(self.name, wx.BITMAP_TYPE_PNG))
+            if keycode == 67 and ctrldown and os.path.isfile(self.path) and wx.TheClipboard.Open() and self.path!="imagePin.png":
+                setClipBitmap = wx.BitmapDataObject(wx.Bitmap(self.path, wx.BITMAP_TYPE_PNG))
                 wx.TheClipboard.SetData(setClipBitmap)
                 wx.TheClipboard.Close()
                 print "copy image to clipboard! "
@@ -1176,26 +1186,26 @@ class grapPartFrame(wx.Frame):
                 
             #---------scale image 
             if keycode == 45 :
-                if ctrldown==False and self.scale>IMAGE_SCALE_MIN_MAX[0] and self.name!="imagePin.png":
+                if ctrldown==False and self.scale>IMAGE_SCALE_MIN_MAX[0] and self.path!="imagePin.png":
                     self.scale=self.scale*(1-SCALE_SPEED)
                     self.resizeMap(self.scale)
                     print "-",self.scale,SCALE_SPEED
                     
                 elif   ctrldown and SCALE_SPEED>ADJUST_SCALE_SPEED*2: 
                     SCALE_SPEED-=ADJUST_SCALE_SPEED
-                    print SCALE_SPEED
+                    print "SCALE_SPEED",SCALE_SPEED
             if keycode == 61 :
-                if ctrldown==False and self.scale<IMAGE_SCALE_MIN_MAX[1]and self.name!="imagePin.png":
+                if ctrldown==False and self.scale<IMAGE_SCALE_MIN_MAX[1]and self.path!="imagePin.png":
                     self.scale=self.scale*(SCALE_SPEED+1)
                     self.resizeMap(self.scale)
                     print "+",self.scale,SCALE_SPEED
                 
                 elif ctrldown and SCALE_SPEED<0.3: 
                     SCALE_SPEED+=ADJUST_SCALE_SPEED
-                    print SCALE_SPEED
+                    print "SCALE_SPEED",SCALE_SPEED
 
             #----------hide and show and delete image 
-            if keycode==72 and ctrldown and self.name!="imagePin.png":
+            if keycode==72 and ctrldown and self.path!="imagePin.png":
                 if shiftdown:
                     for s in ALL_FRAME:
                         s.Show()
@@ -1228,20 +1238,30 @@ class grapPartFrame(wx.Frame):
                         if s !=self and s.hide==False:
                             s.Hide()
                     self.isolation=True
-                    
+            #-----------save         
+            if keycode == 83 and ctrldown:
+                self.onSave(evt)
+            #----------showInExplorer
+            if keycode == 68 and ctrldown:
+                self.showInExplorer(evt)            
+            #----------showInExplorer
+            if keycode == 87 and ctrldown:
+                self.onClose(evt)
                 
+        if keycode==341:
+            self.reName(evt)
         if keycode==340:
             #print "help"
             help_Frame= helpFrame(parent=None,id=0)
             help_Frame.Show()
         
-        if keycode==127 and self.name!="imagePin.png":
+        if keycode==127 and self.path!="imagePin.png":
             if shiftdown:
-                os.remove(self.name)
+                os.remove(self.path)
             else:
                 if os.path.isdir("backup")!=True:
                     os.mkdir("backup")
-                c="move "+self.name+" "+("backup\\"+self.name)
+                c="move "+self.path+" "+("backup\\"+self.path)
                 os.system(c)
                 
             self.Close()
@@ -1249,19 +1269,23 @@ class grapPartFrame(wx.Frame):
         if keycode==65 and altdown and ctrldown and shiftdown:
             grapStart(bmp)
 
-def createMap(mapPath,state,pos,scale):
+def createMap(name,state,pos,scale,mapPath):
     startPos=wx.Point=(pos)
     pos[0]+=SCREEN_POS[0]
     pos[1]+=SCREEN_POS[1]
     tImage=wx.Image(mapPath,wx.BITMAP_TYPE_PNG)
     mapSize=tImage.GetSize()
 
-    newFrame = grapPartFrame(parent=None, id=-1)
+    newFrame = grapPartFrame(parent=None, id=-1,imagePath=mapPath)
     newFrame.pos=pos
     newFrame.miniState=state
     newFrame.scale=scale
     
-    newFrame.name=os.path.basename(mapPath)
+    #set toolTip
+    newFrame.bg.ToolTip=wx.ToolTip(name)
+    newFrame.bg.ToolTip.SetDelay(long(2900)) 
+    
+    newFrame.name=name
     newFrame.SetSize(mapSize)
     newFrame.SetPosition(startPos)
     newFrame.bg.SetBitmap(wx.BitmapFromImage(tImage))
@@ -1271,12 +1295,13 @@ def createMap(mapPath,state,pos,scale):
     newFrame.bg.SetBitmap(wx.BitmapFromImage(tim))  
     newFrame.SetWindowShape(wx.BitmapFromImage(tim))
     newFrame.SetSize(tSize)
-    saveChange(MAIN_SETTINGS_TREE,newFrame.name,state,pos,scale)
+    #saveChange(MAIN_SETTINGS_TREE,newFrame.name,state,pos,scale,mapPath)
     if state:
         newFrame.Show()
     else:
         newFrame.Hide()
     ALL_FRAME.append(newFrame)
+    print "\ncreateMap: " , "\n    name: ",name,"\n    path: ",mapPath
 
 
 def createImagePinFrame(mapPath,state,pos,scale):
@@ -1286,7 +1311,7 @@ def createImagePinFrame(mapPath,state,pos,scale):
     tImage=wx.Image(mapPath,wx.BITMAP_TYPE_PNG)
     mapSize=tImage.GetSize()
 
-    newFrame = grapPartFrame(parent=None, id=-1)
+    newFrame = grapPartFrame(parent=None, id=-1,imagePath=mapPath)
     newFrame.pos=pos
     newFrame.miniState=state
     newFrame.scale=scale
@@ -1317,7 +1342,7 @@ def grap(box):
         region = im.crop(box)
         cim.paste(region, (0,0))
         cim.save(save_path)
-        createMap(save_path,True,[box[0],box[1]],1)
+        createMap(os.path.basename(save_path).replace(".png",""),True,[box[0],box[1]],1,save_path)
 
 def screenCapture(savePath,size):
     global SAVE_SCREEN_MAP_PATH
@@ -1340,37 +1365,74 @@ def grapStart(bmp):
     tImage= tImage.AdjustChannels(1,1,1,0.8)
     mainFrame.bg.SetBitmap(wx.BitmapFromImage(tImage))
     mainFrame.Show()
-
+    print "grapStart: "
 def start():
     global ROOT_DIR
     global settings_data
     LOG=""
     files= os.listdir(ROOT_DIR)
-    i=1
-    names=[]
-    for m in files:
-        nameParts=os.path.basename(m).split("_") 
+
+    
+    loadedImages=[]
+    imagesDate=MAIN_SETTINGS_TREE.findall("images/image")
+    
+    for s in imagesDate:
+        #print s.find("name").text
+        #print s.find("miniState")
+        miniState=True
+        if s.find("miniState").text=="False":
+            miniState=False
+        else:
+            miniState=True
+        pos=[int(s.find("posx").text),int(s.find("posy").text)]
+        scale=float(s.find("scale").text)
+        path=s.find("path").text
+        name=s.find("name").text
+        if os.path.isfile(path):
+            createMap(name,miniState,pos,scale,path)
+            loadedImages.append(path)
+            
+        else:
+            print "\nremove exist  file setting's data: " ,"\n   name: ",s.find("name").text,"\n   path: ",s.find("path").text
+            s.find("path").text="delete"
+            imagesDate.remove(s)
+
+    for s in files:
+        nameParts=os.path.basename(s).split("_") 
         if nameParts[0]==GRAP_PF_NAME:
-            if os.path.splitext(m)[1]==".png":
-                tTree=MAIN_SETTINGS_TREE.find(("images/"+m))
-                #print MAIN_SETTINGS_TREE.find(("images/"+m)).text
-                LOG+="\nname: "+m
-                names.append(m)
-                try:
-                    if tTree.find("miniState").text=="False":
-                        miniState=False
-                    else:
-                        miniState=True
-                    pos=[int(tTree.find("posx").text),int(tTree.find("posy").text)]
-                    scale=float(tTree.find("scale").text)
-                    LOG+="\nload data... : \npos:"+str(pos)+"\nscale: "+str(scale)+"\nminiState: "+str(miniState)
-                except:
-                    LOG+="can;t get data  miniState pos scale"
-                    miniState=False
-                    pos=[10,10]
-                    scale=1
-                    LOG+="\nload fath! set defult data... : \npos:"+str(pos)+"\nscale: "+str(scale)+"\nminiState: "+str(miniState)
-                createMap(m,miniState,pos,scale)
+            if os.path.splitext(s)[1]==".png":
+                if s not in loadedImages:
+                    createMap("noname",True,[10,10],1,s) 
+            
+            
+    
+    
+    # for m in files:
+        # nameParts=os.path.basename(m).split("_") 
+        # if nameParts[0]==GRAP_PF_NAME:
+            # if os.path.splitext(m)[1]==".png":
+                # tTree=MAIN_SETTINGS_TREE.find(("images/"+m))
+                # #print MAIN_SETTINGS_TREE.find(("images/"+m)).text
+                # LOG+="\nname: "+m
+                # names.append(m)
+                
+                # try:
+                    # if tTree.find("miniState").text=="False":
+                    # else:
+                        # miniState=True
+                    # pos=[int(tTree.find("posx").text),int(tTree.find("posy").text)]
+                    # scale=float(tTree.find("scale").text)
+                    # path=float(tTree.find("path").text)
+                    
+                    # LOG+="\nload data... : \npos:"+str(pos)+"\nscale: "+str(scale)+"\nminiState: "+str(miniState)
+                # except:
+                    # LOG+="can;t get data  miniState pos scale"
+                    # miniState=False
+                    # pos=[10,10]
+                    # scale=1
+                    # path=m
+                    # LOG+="\nload fath! set defult data... : \npos:"+str(pos)+"\nscale: "+str(scale)+"\nminiState: "+str(miniState)
+                # createMap(m,miniState,pos,scale,path)
 
         
     imagePin_show=True
