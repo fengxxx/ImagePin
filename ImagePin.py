@@ -82,6 +82,7 @@ EN_Dic = {"grap"              :    "&Grap                -Ctrl+Shift+Alt+A",
     "menu_CN"                 :    u"Chinese 中文",
     "rename"                  :    u"Rename                               -F2",
     "menu_reName_tip"         :    u"Write a new name: ",
+    "menu_reName_tite"        :    u"Rename iamge",
     "menu_reName_pre"         :    u"Name:  "
     
 }
@@ -106,6 +107,7 @@ CN_Dic={"grap"                :    "抓取       -Ctrl+Shift+Alt+A",
     "menu_CN"                 :    u"中文 Chinese",
     "rename"                 :    u"重命名                        -F2",
     "menu_reName_tip"         :    u"输入新名字: ",
+    "menu_reName_tite"        :    u"重命名图片",
     "menu_reName_pre"         :    u"名字:  "
 }
 
@@ -222,7 +224,7 @@ def createSetingsFile():
     global GRAP_PF_NAME
     main_element=Element("root")
     images_element=Element("images")
-    images_element.text="imagePin"
+    #images_element.text="imagePin"
     files= os.listdir(ROOT_DIR)
     haveImage=False
     print files
@@ -253,11 +255,14 @@ def saveChange(mainTree,name,s,pos,sc,filePath):
             s.find("scale").text=sTree.find("scale").text
             changeOn=True
     if changeOn==False:
-        mainTree.find("images/image").append(sTree)
+        mainTree.find("images").append(sTree)
+        
+        
+        #for s in mainTree.findall("images/image"):
+        #print  s.find("path").text,filePath
     settings=ElementTree("root")
     settings._setroot(indent(mainTree))
     settings.write(SET_FILE_PATH,"utf-8")
-
     print "\nsaveChange: ",name
 def save_settings_data(mainTree,data):
     for s in data:
@@ -344,7 +349,7 @@ class MyFileDropTarget(wx.FileDropTarget):
                     im.save(mapName,format="png")
                     print "import  image  succeed: " ,f
                     importOn=True
-                    createMap(mapName,True,[self.pos[0]*0.33,self.pos[1]*0.33],1,mapName)
+                    createMap("noname",True,[int(self.pos[0]*0.33),int(self.pos[1]*0.33)],1,mapName)
             if importOn==False: print "import image  failure: ",f
             
 
@@ -861,6 +866,7 @@ class grapPartFrame(wx.Frame):
         self.bg.Bind(wx.EVT_LEFT_DOWN, self.OnMouseLeftDown)
         
 
+
         self.bg.Bind(wx.EVT_LEFT_DCLICK, self.OnMouseLeftDclick)
         self.bg.Bind(wx.EVT_MIDDLE_UP,  self.onHide)
         self.Bind(wx.EVT_MOUSEWHEEL, self.scaleMap)
@@ -897,7 +903,7 @@ class grapPartFrame(wx.Frame):
         
         if (self.scale>1 and  maxPix>IMAGE_MAX_SIZE) or (self.scale<1 and  minPix<IMAGE_MIN_SIZE):
             ()
-        else:
+        elif self.path!="imagePin.png":
             tSize=(size[0]*self.scale,size[1]*self.scale)
             tim=im.Rescale(size[0]*self.scale,size[1]*self.scale)
             self.bg.SetBitmap(wx.BitmapFromImage(tim))  
@@ -950,7 +956,7 @@ class grapPartFrame(wx.Frame):
                 self.pos=newPos
                 self.scale=minScale
                 self.saveData()
-        self.SetWindowShape(wx.BitmapFromImage(tim))
+            self.SetWindowShape(wx.BitmapFromImage(tim))
 
     def OnMouseLeftDown(self, event):
         self.lastPos[0]=event.GetPosition()[0]
@@ -1039,7 +1045,7 @@ class grapPartFrame(wx.Frame):
     def reName(self, evt):
         dlg = wx.TextEntryDialog(
                 self, LANGUAGE_PACK["menu_reName_tip"],
-                LANGUAGE_PACK["rename"], "imagePin")
+                LANGUAGE_PACK["menu_reName_tite"], "imagePin")
         dlg.SetValue(self.name)
 
         if dlg.ShowModal() == wx.ID_OK:
@@ -1175,7 +1181,7 @@ class grapPartFrame(wx.Frame):
                     a=random.randint(0, 10000)
                     mapName=GRAP_PF_NAME+"_"+str(a)+"_"+str(int(time.time()))+".png"
                     clipBitmap.GetBitmap().ConvertToImage().SaveFile(mapName,wx.BITMAP_TYPE_PNG)
-                    createMap(mapName,True,[(self.pos[0]+7),(self.pos[1]+7)],1,mapName)
+                    createMap("noname",True,[(self.pos[0]+7),(self.pos[1]+7)],1,mapName)
                     print "paste image from clipboard! "
             if keycode == 67 and ctrldown and os.path.isfile(self.path) and wx.TheClipboard.Open() and self.path!="imagePin.png":
                 setClipBitmap = wx.BitmapDataObject(wx.Bitmap(self.path, wx.BITMAP_TYPE_PNG))
@@ -1396,6 +1402,7 @@ def start():
             print "\nremove exist  file setting's data: " ,"\n   name: ",s.find("name").text,"\n   path: ",s.find("path").text
             s.find("path").text="delete"
             imagesDate.remove(s)
+            MAIN_SETTINGS_TREE.findall("images/image").remove(s)
 
     for s in files:
         nameParts=os.path.basename(s).split("_") 
