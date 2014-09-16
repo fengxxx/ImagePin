@@ -84,9 +84,8 @@ EN_Dic = {"grap"              :    "&Grap                -Ctrl+Shift+Alt+A",
     "menu_reName_tip"         :    u"Write a new name: ",
     "menu_reName_tite"        :    u"Rename iamge",
     "menu_reName_pre"         :    u"Name:  "
-    
 }
-    
+
 CN_Dic={"grap"                :    "抓取       -Ctrl+Shift+Alt+A",
     "save"                    :    "另存为                  -Ctrl+S",
     "help"                    :    "帮助                        -F1",
@@ -985,12 +984,6 @@ class grapPartFrame(wx.Frame):
             self.pos[1]=newPos[1]
 
     def OnContextMenu(self, event):
-        # only do this part the first time so the events are only bound once
-        #
-        # Yet another anternate way to do IDs. Some prefer them up top to
-        # avoid clutter, some prefer them close to the object of interest
-        # for clarity. 
-
         if not hasattr(self, "pp_SAVE"):
             self.pp_SAVE = wx.NewId()
             self.pp_CLOSE = wx.NewId()
@@ -1017,9 +1010,7 @@ class grapPartFrame(wx.Frame):
             self.Bind(wx.EVT_MENU, self.showFrameManager, id=self.pp_FRAMEMANAGER)
             self.Bind(wx.EVT_MENU, self.showInExplorer, id=self.pp_SHOWINEXPLORER)
             self.Bind(wx.EVT_MENU, self.reName, id=self.pp_RENAME)
-        
-        
-        
+                
         bmp=wx.BitmapFromIcon(wx.Icon(os.getcwd()+'\\App.ico'))
         menu = wx.Menu()
         if self.path!="imagePin.png":
@@ -1042,6 +1033,7 @@ class grapPartFrame(wx.Frame):
 
         self.PopupMenu(menu)
         menu.Destroy()
+        
     def reName(self, evt):
         dlg = wx.TextEntryDialog(
                 self, LANGUAGE_PACK["menu_reName_tip"],
@@ -1136,9 +1128,7 @@ class grapPartFrame(wx.Frame):
         
     def saveData(self):
         self.miniState=self.IsShown()
-        #print "save: " ,LANGUAGE_TYPE
         saveChange(MAIN_SETTINGS_TREE,self.name,self.miniState,self.pos,self.scale,self.path)
-        #print "save: " ,SCALE_SPEED
         
     def showFrameManager(self,event):
         FM=frameManage(parent=None,id=-1)
@@ -1309,7 +1299,6 @@ def createMap(name,state,pos,scale,mapPath):
     ALL_FRAME.append(newFrame)
     print "\ncreateMap: " , "\n    name: ",name,"\n    path: ",mapPath
 
-
 def createImagePinFrame(mapPath,state,pos,scale):
     startPos=wx.Point=(pos)
     pos[0]+=SCREEN_POS[0]
@@ -1372,6 +1361,7 @@ def grapStart(bmp):
     mainFrame.bg.SetBitmap(wx.BitmapFromImage(tImage))
     mainFrame.Show()
     print "grapStart: "
+    
 def start():
     global ROOT_DIR
     global settings_data
@@ -1446,33 +1436,33 @@ def start():
     for s in ALL_FRAME:
         if s.IsShown():imagePin_show=False
     if imagePin_show:imagePinFrame.Show()
+
+
+
+if __name__ == '__main__':
         
-                
+    WMI = GetObject('winmgmts:')
+    processes = WMI.InstancesOf('Win32_Process')
+    myCount=0
+    for s in processes:
+        if s.name=="ImagePin.exe":# "python.exe":#
+            myCount+=1
 
-    
-                
-                
-WMI = GetObject('winmgmts:')
-processes = WMI.InstancesOf('Win32_Process')
-myCount=0
-for s in processes:
-    if s.name=="ImagePin.exe":# "python.exe":#
-        myCount+=1
+            
+    if myCount<3:
+        # get screen size and pos 
 
-if myCount<3:
-    # get screen size and pos 
+        
+        #print "start : ",SCALE_SPEED
+        mainApp = wx.App()
+        bmp=wx.EmptyBitmap(10,10, depth=-1)
+        mainFrame=grapingScreenFrame(parent=None, id=-1)
+        mainFrame.bg.SetBitmap(bmp)
+        
+        imagePin_Path="imagePin.png"   
+        imagePin_Pos=[100,100]
+        imagePinFrame=createImagePinFrame(imagePin_Path,True,imagePin_Pos,1)
+        
 
-    
-    #print "start : ",SCALE_SPEED
-    mainApp = wx.App()
-    bmp=wx.EmptyBitmap(10,10, depth=-1)
-    mainFrame=grapingScreenFrame(parent=None, id=-1)
-    mainFrame.bg.SetBitmap(bmp)
-    
-    imagePin_Path="imagePin.png"   
-    imagePin_Pos=[100,100]
-    imagePinFrame=createImagePinFrame(imagePin_Path,True,imagePin_Pos,1)
-    
-
-    start()
-    mainApp.MainLoop()
+        start()
+        mainApp.MainLoop()
