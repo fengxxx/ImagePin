@@ -836,7 +836,8 @@ class grapPartFrame(wx.Frame):
     global IMAGE_MIN_SIZE
     #global LANGUAGE_TYPE
     global TEST_FRAME
-    
+    global imagePinFrame
+    global mainFrame
     name="no name"
     path="imagePin.png"
     isolation=False
@@ -998,7 +999,7 @@ class grapPartFrame(wx.Frame):
             
             self.pp_test=wx.NewId()
             self.pp_RENAME=wx.NewId()
-            
+            self.pp_EXIT=wx.NewId()
             self.Bind(wx.EVT_MENU, self.onSave, id=self.pp_SAVE)
             self.Bind(wx.EVT_MENU, self.onClose, id=self.pp_CLOSE)
             self.Bind(wx.EVT_MENU, self.onDelete, id=self.pp_DELETE)    
@@ -1010,7 +1011,7 @@ class grapPartFrame(wx.Frame):
             self.Bind(wx.EVT_MENU, self.showFrameManager, id=self.pp_FRAMEMANAGER)
             self.Bind(wx.EVT_MENU, self.showInExplorer, id=self.pp_SHOWINEXPLORER)
             self.Bind(wx.EVT_MENU, self.reName, id=self.pp_RENAME)
-                
+            self.Bind(wx.EVT_MENU,self.closeApp,id=self.pp_EXIT)
         bmp=wx.BitmapFromIcon(wx.Icon(os.getcwd()+'\\App.ico'))
         menu = wx.Menu()
         if self.path!="imagePin.png":
@@ -1030,9 +1031,24 @@ class grapPartFrame(wx.Frame):
             menu.AppendItem(item)
             menu.Append(self.pp_CLOSE, LANGUAGE_PACK["close"])
             menu.Append(self.pp_DELETE, LANGUAGE_PACK["delete"])
-
+        menu.Append(self.pp_EXIT,LANGUAGE_PACK["exit"])
         self.PopupMenu(menu)
         menu.Destroy()
+ 
+    def closeApp(self,event):
+        imagePinFrame.saveData()
+        for s in ALL_FRAME:
+            try:
+                s.saveData()
+            except:
+                ()
+        save_settings_data(MAIN_SETTINGS_TREE,settings_data)
+        mainFrame.tbicon.RemoveIcon()
+        #self.frame.Close()
+        if os.path.isfile("screen.png"):
+        	os.remove("screen.png")
+        os.system("taskkill /f /im  ImagePin.exe &exit()")
+        sys.exit()
         
     def reName(self, evt):
         dlg = wx.TextEntryDialog(
