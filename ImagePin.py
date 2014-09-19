@@ -10,7 +10,7 @@ import wx,os,time,random,Image
 from  xml.etree.ElementTree import*
 from shutil import copy
 from win32com.client import GetObject
-
+import urllib2
 helpInfor_EN='''
     ------------DESCRIPTION---------------------KEYBOARD--------------------MOSUE-----------
     |  grap  image frome screen         |   CTRL+SHIFT+ALT+A     |                         |
@@ -352,6 +352,25 @@ class MyFileDropTarget(wx.FileDropTarget):
             if importOn==False: print "import image  failure: ",f
             
 
+class MyURLDropTarget(wx.PyDropTarget):
+    def __init__(self, window):
+        wx.PyDropTarget.__init__(self)
+        self.window = window
+
+        self.data = wx.URLDataObject();
+        self.SetDataObject(self.data)
+
+    def OnDragOver(self, x, y, d):
+        return wx.DragLink
+
+    def OnData(self, x, y, d):
+        if not self.GetData():
+            return wx.DragNone
+
+        url = self.data.GetURL()
+        self.window.AppendText(url + "\n")
+
+        return d
 class helpFrame(wx.Frame):
     global LANGUAGE_TYPE,MAIN_SETTINGS_TREE ,settings_data
     def __init__(self, parent,id):
@@ -1187,7 +1206,7 @@ class grapPartFrame(wx.Frame):
                     a=random.randint(0, 10000)
                     mapName=GRAP_PF_NAME+"_"+str(a)+"_"+str(int(time.time()))+".png"
                     clipBitmap.GetBitmap().ConvertToImage().SaveFile(mapName,wx.BITMAP_TYPE_PNG)
-                    createMap("noname",True,[(self.pos[0]+7),(self.pos[1]+7)],1,mapName)
+                    createMap("noname_paste",True,[(self.pos[0]+7),(self.pos[1]+7)],1,mapName)
                     print "paste image from clipboard! "
             if keycode == 67 and ctrldown and os.path.isfile(self.path) and wx.TheClipboard.Open() and self.path!="imagePin.png":
                 setClipBitmap = wx.BitmapDataObject(wx.Bitmap(self.path, wx.BITMAP_TYPE_PNG))
@@ -1334,10 +1353,23 @@ class textFrame(wx.Frame):
         self.sizebar.Bind(wx.EVT_LEFT_UP, self.OnSizeMouseLeftUp) 
         self.sizebar.Bind(wx.EVT_LEFT_DOWN, self.OnSizeMouseLeftDown) 
         self.sizebar.Bind(wx.EVT_MOTION,  self.OnSizeMove)
-    
+        self.textC.Bind(wx.EVT_MOTION, self.OnStartDrag)
+        self.textC.SetDropTarget(MyURLDropTarget(self.textC))  
    
+    def OnStartDrag(self, evt):
+        if evt.Dragging():
+            url = self.textC.GetValue()
+            data = wx.URLDataObject()
+            data.SetURL(url)
 
-
+            dropSource = wx.DropSource(self.textC)
+            dropSource.SetData(data)
+            result = dropSource.DoDragDrop()
+            print result,url
+            f = urllib2.urlopen(url) 
+            
+            with open("demo2.jpg", "wb") as code:
+                code.write(f.read()) 
         
     def OnSizeMove(self, event):
         newSizeX=event.GetPosition()[0]-self.lastPos[0]+self.GetClientSize()[0]
