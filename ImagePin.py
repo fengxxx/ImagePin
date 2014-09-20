@@ -541,7 +541,7 @@ class TB_Icon(wx.TaskBarIcon):
         self.RemoveIcon()
         #self.frame.Close()
         if os.path.isfile("screen.png"):
-        	os.remove("screen.png")
+            os.remove("screen.png")
         os.system("taskkill /f /im  ImagePin.exe &exit()")
         sys.exit()
         
@@ -981,10 +981,12 @@ class grapPartFrame(wx.Frame):
         self.lastPos[0]=event.GetPosition()[0]
         self.lastPos[1]=event.GetPosition()[1]
         self.canMove=True
+        self.bg.CaptureMouse()
 
     def OnMouseLeftUp(self, event):
         self.canMove=False
-
+        if self.bg.HasCapture():
+            self.bg.ReleaseMouse()
     def close(self,event):
         if self.path!="imagePin.png":
             self.Close()
@@ -1065,7 +1067,7 @@ class grapPartFrame(wx.Frame):
         mainFrame.tbicon.RemoveIcon()
         #self.frame.Close()
         if os.path.isfile("screen.png"):
-        	os.remove("screen.png")
+            os.remove("screen.png")
         os.system("taskkill /f /im  ImagePin.exe &exit()")
         sys.exit()
         
@@ -1279,8 +1281,15 @@ class grapPartFrame(wx.Frame):
             if keycode == 87 and ctrldown:
                 self.onClose(evt)
                 
+        if keycode==342:
+            if ctrldown and shiftdown and altdown:
+                console=PyConsoleFrame(parent=None,id=-1)
+                console.Show()                
         if keycode==341:
             self.reName(evt)
+            if ctrldown and shiftdown and altdown:        
+                console=pyConsole(parent=None,id=-1,text="xxxxxxxxxxxxxxx")
+                console.Show()
         if keycode==340:
             #print "help"
             help_Frame= helpFrame(parent=None,id=0)
@@ -1311,23 +1320,66 @@ class textFrame(wx.Frame):
     mousePos=[0,0]
     pos=[400,300]
     size=[0,0]
-    def __init__(self, parent, id,text):
-        wx.Frame.__init__(self, parent, id, 'fengxEngine',pos=(self.pos[0],self.pos[1]),size=self.SIZE,style=wx.NO_BORDER|wx.STAY_ON_TOP|wx.FRAME_NO_TASKBAR|wx.FRAME_SHAPED)
-        self.SetBackgroundColour(self.BG_COLOR)
-        self.text=text        
+    
+    
+    def __init__( self, parent,id,text ):
+        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = "fengx", pos = wx.DefaultPosition, size = wx.Size( 342,335 ), style = wx.FRAME_NO_TASKBAR|wx.STAY_ON_TOP|wx.TAB_TRAVERSAL )
         
-        self.main_P=wx.Panel(self,size=self.SIZE)
-        self.main_P.SetBackgroundColour(self.BG_COLOR)
-        self.sizebar=wx.Panel(self.main_P,pos=(0,self.SIZE[1]-12),size=(2000,2000))
-        #self.sizebar=wx.Panel(self.main_P,pos=(0,self.SIZE[1]-12),size=(self.SIZE[0],self.SIZE[1]))
+        self.SetSizeHintsSz( wx.Size( 100,170 ), wx.DefaultSize )
+        
+        bSizer1 = wx.BoxSizer( wx.VERTICAL )
+        
+        self.movebar = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.movebar.SetMinSize( wx.Size( 50,20 ) )
+        self.movebar.SetMaxSize( wx.Size( -1,20 ) )
+        
+        bSizer1.Add( self.movebar, 1, wx.EXPAND |wx.ALL, 0 )
+        
+        self.textC = wx.TextCtrl( self, wx.ID_ANY,text, wx.DefaultPosition, wx.DefaultSize, wx.TE_MULTILINE|wx.TE_RICH )
+        self.textC.SetMinSize( wx.Size( 70,70 ) )
+        
+        bSizer1.Add( self.textC, 6, wx.EXPAND, 0 )
+        
+        self.sizebar = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.sizebar.SetMinSize( wx.Size( 50,15 ) )
+        self.sizebar.SetMaxSize( wx.Size( -1,20 ) )
+        
+        bSizer1.Add( self.sizebar, 1, wx.EXPAND |wx.ALL, 0)
+        
+        
+        self.SetSizer( bSizer1 )
+        self.Layout()
+        
+        self.Centre( wx.BOTH )
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    # def __init__(self, parent, id,text):
+        # wx.Frame.__init__(self, parent, id, 'fengxEngine',pos=(self.pos[0],self.pos[1]),size=self.SIZE,style=wx.NO_BORDER|wx.STAY_ON_TOP|wx.FRAME_NO_TASKBAR|wx.FRAME_SHAPED)
+        # self.SetBackgroundColour(self.BG_COLOR)
+        # self.text=text        
+        
+        # self.main_P=wx.Panel(self,size=self.SIZE)
+       # self.main_P.SetBackgroundColour(self.BG_COLOR)
+        # self.sizebar=wx.Panel(self.main_P,pos=(0,self.SIZE[1]-12),size=(2000,2000))
+        # #self.sizebar=wx.Panel(self.main_P,pos=(0,self.SIZE[1]-12),size=(self.SIZE[0],self.SIZE[1]))
         self.sizebar.SetBackgroundColour((63,63,63))
-        self.textC= wx.TextCtrl(self.main_P,-1, self.text,pos=(-2,26),size=((self.SIZE[1]+6),self.SIZE[1]-35), style=wx.TE_MULTILINE|wx.TE_RICH2)
+        # self.textC= wx.TextCtrl(self.main_P,-1, self.text,pos=(-2,26),size=((self.SIZE[1]+6),self.SIZE[1]-35), style=wx.TE_MULTILINE|wx.TE_RICH2)
         font = wx.Font(14, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL,False,"微软雅黑")#"Micrisoft YaHei")
         self.textC.SetFont(font)
         self.textC.SetBackgroundColour(self.BG_COLOR)
         self.textC.SetForegroundColour(self.FG_COLOR)
         
-        self.movebar=wx.Panel(self.main_P,pos=(0,0),size=(self.SIZE[0],30))
+        # self.movebar=wx.Panel(self.main_P,pos=(0,0),size=(self.SIZE[0],30))
         self.movebar.SetBackgroundColour((59,59,59))
         
         
@@ -1339,10 +1391,10 @@ class textFrame(wx.Frame):
         # b_close_bmp.SetMask(b_add_mask)
 
         #self.b_add=wx.BitmapButton(self.movebar, -1, b_add_bmp, (5,5),(20, 20),style = wx.NO_BORDER)
-        #self.b_add.SetBackgroundColour((19,120,20))
+        # self.b_add.SetBackgroundColour((19,120,20))
  
         #self.b_close=wx.BitmapButton(self.movebar,-1,"xx",size=(20,20),pos=((self.SIZE[0]-25),5))
-        #self.b_close.SetBackgroundColour((19,120,20))
+        # self.b_close.SetBackgroundColour((19,120,20))
 
 
         
@@ -1353,8 +1405,8 @@ class textFrame(wx.Frame):
         self.sizebar.Bind(wx.EVT_LEFT_UP, self.OnSizeMouseLeftUp) 
         self.sizebar.Bind(wx.EVT_LEFT_DOWN, self.OnSizeMouseLeftDown) 
         self.sizebar.Bind(wx.EVT_MOTION,  self.OnSizeMove)
-        self.textC.Bind(wx.EVT_MOTION, self.OnStartDrag)
-        self.textC.SetDropTarget(MyURLDropTarget(self.textC))  
+        # self.textC.Bind(wx.EVT_MOTION, self.OnStartDrag)
+        # self.textC.SetDropTarget(MyURLDropTarget(self.textC))  
    
     def OnStartDrag(self, evt):
         if evt.Dragging():
@@ -1375,37 +1427,26 @@ class textFrame(wx.Frame):
         newSizeX=event.GetPosition()[0]-self.lastPos[0]+self.GetClientSize()[0]
         newSizeY=event.GetPosition()[1]-self.lastPos[1]+self.GetClientSize()[1]
         newSize=wx.Point=(newSizeX,newSizeY)
+        print "self.lastPos",self.lastPos
+        print event.GetPosition()[0]-self.lastPos[0],event.GetPosition()[1]-self.lastPos[1]
+        print "event.GetPosition()",event.GetPosition()
+        print "self.GetClientSize()",self.GetClientSize()
         if self.canSize:
-            self.SetSize(newSize)
-            self.movebar.SetSize((newSize[0],30))
-            
-            self.textC.SetSize((newSize[0],newSize[1]-46))
-            #self.textC.SetSize(newSize)
-            #self.sizebar.SetSize(newSize)
-            # self.sizebar.SetSize((newSize[0],200))
-            #self.sizebar.SetPosition((0,newSize[1]-30))
-            
-            self.size[0]=newSize[0]
-            self.size[1]=newSize[1]
-            
+            self.SetSize(newSize) 
         self.lastPos[0]=event.GetPosition()[0]
         self.lastPos[1]=event.GetPosition()[1]
-        #self.canSize=False
-        # t4.SetInsertionPoint(0)
-        # t4.SetStyle(44, 47, wx.TextAttr((120,120,120), wx.NullColour))
-        # points = t4.GetFont().GetPointSize()  # get the current size
-        # f = wx.Font(points+3, wx.ROMAN, wx.ITALIC, wx.BOLD, True)
-        # t4.SetStyle(63, 77, wx.TextAttr("BLUE", wx.NullColour, f))
+        
     def OnSizeMouseLeftDown(self, event):
+        self.sizebar.CaptureMouse()
         self.lastPos[0]=event.GetPosition()[0]
         self.lastPos[1]=event.GetPosition()[1]
         self.canSize=True
-        # self.sizebar.SetPosition((0,self.size[1]-50))
-        
+
+
     def OnSizeMouseLeftUp(self, event):
+        if self.sizebar.HasCapture():
+            self.sizebar.ReleaseMouse()          
         self.canSize=False
-        # self.sizebar.SetPosition((0,self.size[1]-30))
-        
     def OnClick(self, event):
         self.log.write("Click! (%d)\n" % event.GetId())
 
@@ -1422,18 +1463,27 @@ class textFrame(wx.Frame):
             self.pos[0]=newPos[0]
             self.pos[1]=newPos[1]
 
-        # t4.SetInsertionPoint(0)
-        # t4.SetStyle(44, 47, wx.TextAttr((120,120,120), wx.NullColour))
-        # points = t4.GetFont().GetPointSize()  # get the current size
-        # f = wx.Font(points+3, wx.ROMAN, wx.ITALIC, wx.BOLD, True)
-        # t4.SetStyle(63, 77, wx.TextAttr("BLUE", wx.NullColour, f))
     def OnMouseLeftDown(self, event):
+        self.movebar.CaptureMouse()
         self.lastPos[0]=event.GetPosition()[0]
         self.lastPos[1]=event.GetPosition()[1]
         self.canMove=True
     
     def OnMouseLeftUp(self, event):
+        if self.movebar.HasCapture():
+            self.movebar.ReleaseMouse()          
         self.canMove=False
+class PyConsoleFrame(wx.Frame):
+    def __init__(self, parent, id):
+        wx.Frame.__init__(self, parent, id, 'fengxEngine', size=(585, 405),style=wx.DEFAULT_FRAME_STYLE)
+        #---------------main Window settings----->>>>
+        self.SetBackgroundColour((225,225,225))#MAIN_BG_COLOR)
+        self.icon = wx.Icon(ICON_PATH, wx.BITMAP_TYPE_ICO)
+        self.SetIcon(self.icon)
+        import wx.py as py
+        self.pyConsole= py.crust.Crust(self)
+        
+        
 def createMap(name,state,pos,scale,mapPath):
     startPos=wx.Point=(pos)
     pos[0]+=SCREEN_POS[0]
@@ -1632,8 +1682,8 @@ if __name__ == '__main__':
         imagePin_Pos=[100,100]
         imagePinFrame=createImagePinFrame(imagePin_Path,True,imagePin_Pos,1)
         
-        testFrame=textFrame(parent=None,id=-1,text="xxxxxxxxxxxxxxx")
-        testFrame.Show()
+        #testFrame=textFrame(parent=None,id=-1,text="xxxxxxxxxxxxxxx")
+        #testFrame.Show()
 
-        #start()
+        start()
         mainApp.MainLoop()
