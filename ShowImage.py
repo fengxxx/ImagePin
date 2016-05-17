@@ -348,7 +348,7 @@ class grapPartFrame(wx.Frame):
             self.Bind(wx.EVT_MENU, self.showInExplorer, id=self.pp_SHOWINEXPLORER)
             self.Bind(wx.EVT_MENU, self.reName, id=self.pp_RENAME)
             self.Bind(wx.EVT_MENU,self.closeApp,id=self.pp_EXIT)
-        bmp=wx.BitmapFromIcon(wx.Icon(os.getcwd()+'\\App.ico'))
+        bmp=wx.BitmapFromIcon(wx.Icon(os.getcwd()+'/App.ico'))
         menu = wx.Menu()
         if self.path!="imagePin.png":
             menu.Append(self.pp_RENAME, (LANGUAGE_PACK["menu_reName_pre"]+self.name))
@@ -408,7 +408,7 @@ class grapPartFrame(wx.Frame):
          defaultFile=self.name, wildcard=wildcard,style=wx.SAVE)
 
         tPath=os.path.dirname(self.path)
-        tPath=ROOT_DIR+"\\"+self.path
+        tPath=ROOT_DIR+"/"+self.path
         if dialog.ShowModal()==wx.ID_OK:
             im = Image.open(self.path)
             #file_et=os.path.splitext(dialog.GetPath())[1]
@@ -432,7 +432,7 @@ class grapPartFrame(wx.Frame):
         ALL_FRAME.remove(self)
         if os.path.isdir("backup")!=True:
             os.mkdir("backup")
-        c="move "+self.path+" "+("backup\\"+self.path)
+        c="move "+self.path+" "+("backup/"+self.path)
         os.system(c)
         #os.remove(self.path)
         self.Close()
@@ -463,7 +463,7 @@ class grapPartFrame(wx.Frame):
             if os.path.splitext(m)[1]==".png":
                 if os.path.isdir("backup")!=True:
                     os.mkdir("backup")
-                    c="move "+ os.path.split(m)[1]+" "+(os.path.split(m)[0]+"\\backup\\" + os.path.split(m)[1])
+                    c="move "+ os.path.split(m)[1]+" "+(os.path.split(m)[0]+"/backup/" + os.path.split(m)[1])
                     os.system(c)
 
     def showInExplorer(self, evt):
@@ -472,7 +472,7 @@ class grapPartFrame(wx.Frame):
     def beWindowsPath(self,cPath):
         newPath=""
         for s in cPath:
-            if s=="\\":
+            if s=="/":
                 newPath+="/"
             else:
                 newPath+=s
@@ -616,7 +616,7 @@ class grapPartFrame(wx.Frame):
             else:
                 if os.path.isdir("backup")!=True:
                     os.mkdir("backup")
-                c="move "+self.path+" "+("backup\\"+self.path)
+                c="move "+self.path+" "+("backup/"+self.path)
                 os.system(c)
 
             self.Close()
@@ -943,7 +943,7 @@ if __name__ == '__main__':
 	# createMap("noname_paste",True,(100,100),1,1,"imagePin")\
 
 	createImage("noname",True,imagePin_Pos,1,imagePin_Path)
-	createImage("1",True,[200,200],1,"2.png")
+	createImage("1",True,[200,200],1,"demo.png")
 	#createImage("1",True,[500,500],1,"1.png")
 	#testFrame=textFrame(parent=None,id=-1,text="xxxxxxxxxxxxxxx")
 	#testFrame.Show()
