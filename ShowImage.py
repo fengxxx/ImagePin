@@ -155,14 +155,19 @@ class grapPartFrame(wx.Frame):
     scale=1
     lastPos=[0,0]
     canMove=False
+    canSize=False
     bSize=SCREEN_SIZE
     sSize=(SCREEN_SIZE[0]*0.1,SCREEN_SIZE[1]*0.1)
     log="ss"
     ID=0
-
-    def __init__(self, parent, id,imagePath):
+    im=wx.Image(path)
+    size=[100,100]
+    minSize=[100,50]
+    def __init__(self, parent, id,imagePath,im):
         wx.Frame.__init__(self, parent, id, 'fengx', size=SCREEN_SIZE,style=wx.NO_BORDER|wx.STAY_ON_TOP|wx.FRAME_NO_TASKBAR|wx.FRAME_SHAPED)
         tBmp=wx.EmptyBitmap(600,600, depth=-1)
+        self.im=im
+        self.size=im.GetSize()
         self.bg=wx.StaticBitmap(self,-1,  tBmp, (0,0))
         self.bg.Bind(wx.EVT_MOTION,  self.OnMove)
         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
@@ -203,58 +208,54 @@ class grapPartFrame(wx.Frame):
             self.dc.DrawBitmap(bbmp, 0,0, True)
 
     def resizeMap(self,sc):
-        im=wx.Image(self.path)
-        size=im.GetSize()
-        maxPix=min(size)*self.scale
-        minPix=min(size)*self.scale
+
+        maxPix=min(self.size)*self.scale
+        minPix=min(self.size)*self.scale
 
         if (self.scale>1 and  maxPix>IMAGE_MAX_SIZE) or (self.scale<1 and  minPix<IMAGE_MIN_SIZE):
             ()
         elif self.path!="imagePin.png":
-            tSize=(size[0]*self.scale,size[1]*self.scale)
-            tim=im.Rescale(size[0]*self.scale,size[1]*self.scale)
+            tSize=(self.size[0]*self.scale,self.size[1]*self.scale)
+            tim=self.im.Rescale(self.size[0]*self.scale,self.size[1]*self.scale)
             self.bg.SetBitmap(wx.BitmapFromImage(tim))
             self.SetSize(tSize)
             self.SetWindowShape(wx.BitmapFromImage(tim))
 
     def scaleMap(self,event):
         global SCREEN_SIZE
-        im=wx.Image(self.path)
-        size=im.GetSize()
         if event.GetWheelRotation()<0 and self.path!="imagePin.png" :
-            if  self.scale*size[0]>IMAGE_MIN_SIZE and self.scale*size[1]>IMAGE_MIN_SIZE:
+            if  self.scale*self.size[0]>IMAGE_MIN_SIZE and self.scale*self.size[1]>IMAGE_MIN_SIZE:
                 self.scale=self.scale*(1-SCALE_SPEED)
                 self.resizeMap(self.scale)
         elif  self.path!="imagePin.png":
-            if  self.scale*size[0]< SCREEN_SIZE[0]*1.4 and self.scale*size[1]< SCREEN_SIZE[1]*1.4:
+            if  self.scale*self.size[0]< SCREEN_SIZE[0]*1.4 and self.scale*self.size[1]< SCREEN_SIZE[1]*1.4:
                 self.scale=self.scale*(1+SCALE_SPEED)
                 self.resizeMap(self.scale)
 
     def OnMouseLeftDclick(self, event):
         if self.path!="imagePin.png":
-            im=wx.Image(self.path)
             newSize=[50,50]
             minSize=60.0
             minScale=1
-            mapSize=(im.Width,im.Height)
+            mapSize=(self.im.Width,self.im.Height)
             if self.GetSize()[0]<=minSize or self.GetSize()[1]<=minSize:
-                tim=im.Rescale(im.Width,im.Height)
+                tim=self.im.Rescale(self.im.Width,self.im.Height)
                 self.bg.SetBitmap(wx.BitmapFromImage(tim))
-                self.SetSize((im.Width,im.Height))
+                self.SetSize((self.im.Width,self.im.Height))
                 newPos=[int(self.pos[0]+event.GetPosition()[0]-mapSize[0]/2),int(self.pos[1]+event.GetPosition()[1]-mapSize[1]/2)]
                 self.SetPosition(newPos)
                 self.pos=newPos
                 self.scale=1
 
             else:
-                if im.Width>=im.Height:
-                    minScale=minSize/im.Height
-                    newSize=(int(im.Width*minScale),int(minSize))
+                if self.im.Width>=self.im.Height:
+                    minScale=minSize/self.im.Height
+                    newSize=(int(self.im.Width*minScale),int(minSize))
                 else:
-                    minScale=minSize/im.Width
-                    newSize=(int(minSize),int(im.Height*minScale))
+                    minScale=minSize/self.im.Width
+                    newSize=(int(minSize),int(self.im.Height*minScale))
 
-                tim=im.Rescale(int(im.Width*minScale),int(im.Height*minScale))
+                tim=self.im.Rescale(int(self.im.Width*minScale),int(self.im.Height*minScale))
                 self.bg.SetBitmap(wx.BitmapFromImage(tim))
                 self.SetSize(newSize)
                 newPos=[int(self.pos[0]+event.GetPosition()[0]-minSize/2),int(self.pos[1]+event.GetPosition()[1]-minSize/2)]#[int(self.pos[0]+mapSize[0]/2),int(self.pos[1]+mapSize[1]/2)]
@@ -266,15 +267,26 @@ class grapPartFrame(wx.Frame):
             self.SetWindowShape(wx.BitmapFromImage(tim))
 
     def OnMouseLeftDown(self, event):
-        self.lastPos[0]=event.GetPosition()[0]
-        self.lastPos[1]=event.GetPosition()[1]
-        self.canMove=True
+        self.lastPos[0]=wx.GetMousePosition()[0]
+        self.lastPos[1]=wx.GetMousePosition()[1]
         self.bg.CaptureMouse()
 
+        pos= event.GetPosition()
+        box=10
+        if self.GetClientSize()[0]-pos[0]<box and self.GetClientSize()[1]-pos[1]<box:
+            self.canSize=True
+            print "scale:::::;"
+            self.canMove=False
+        else:
+            print "move:::::;"
+            self.canSize=False
+            self.canMove=True
     def OnMouseLeftUp(self, event):
         self.canMove=False
+        self.canSize=False
         if self.bg.HasCapture():
             self.bg.ReleaseMouse()
+
     def close(self,event):
         if self.path!="imagePin.png":
             self.Close()
@@ -283,15 +295,30 @@ class grapPartFrame(wx.Frame):
         print "RightDown"
 
     def OnMove(self, event):
-        newPosX=event.GetPosition()[0]-self.lastPos[0]+self.pos[0]
-        newPosY=event.GetPosition()[1]-self.lastPos[1]+self.pos[1]
+        #size
+        newSizeX=wx.GetMousePosition()[0]-self.lastPos[0]+self.GetClientSize()[0]
+        newSizeY=wx.GetMousePosition()[1]-self.lastPos[1]+self.GetClientSize()[1]
+        newSize=wx.Point=(newSizeX,newSizeY)
+        #move pos
+        newPosX=wx.GetMousePosition()[0]-self.lastPos[0]+self.pos[0]
+        newPosY=wx.GetMousePosition()[1]-self.lastPos[1]+self.pos[1]
         newPos=wx.Point=(newPosX,newPosY)
-        self.mousePos[0]=event.GetPosition()[0]
-        self.mousePos[1]=event.GetPosition()[1]
-        if self.canMove:
+        self.mousePos=wx.GetMousePosition()
+        if self.canMove and not self.canSize:
             self.SetPosition(newPos)
             self.pos[0]=newPos[0]
             self.pos[1]=newPos[1]
+        if not self.canMove and self.canSize :
+            #if self.GetClientSize()[1]>self.minSize[1] and self.GetClientSize()[0]>self.minSize[0]:
+            self.SetSize(newSize)
+        self.lastPos=wx.GetMousePosition()
+        box=10
+        pos= event.GetPosition()
+        #print "size: ",self.GetClientSize()," | pos:",pos
+        if self.GetClientSize()[0]-pos[0]<box and self.GetClientSize()[1]-pos[1]<box:
+            self.SetCursor(wx.StockCursor(wx.CURSOR_SIZENWSE))
+        else:
+            self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 
     def OnContextMenu(self, event):
         if not hasattr(self, "pp_SAVE"):
@@ -345,18 +372,18 @@ class grapPartFrame(wx.Frame):
         menu.Destroy()
 
     def closeApp(self,event):
-        imagePinFrame.saveData()
-        for s in ALL_FRAME:
-            try:
-                s.saveData()
-            except:
-                ()
-        save_settings_data(MAIN_SETTINGS_TREE,settings_data)
-        mainFrame.tbicon.RemoveIcon()
+        #imagePinFrame.saveData()
+        #for s in ALL_FRAME:
+        #    try:
+        #        s.saveData()
+        #    except:
+        #        ()
+        #save_settings_data(MAIN_SETTINGS_TREE,settings_data)
+        #mainFrame.tbicon.RemoveIcon()
         #self.frame.Close()
-        if os.path.isfile("screen.png"):
-            os.remove("screen.png")
-        os.system("taskkill /f /im  ImagePin.exe &exit()")
+        #if os.path.isfile("screen.png"):
+        #    os.remove("screen.png")
+        #os.system("taskkill /f /im  ImagePin.exe &exit()")
         sys.exit()
 
     def reName(self, evt):
@@ -877,11 +904,10 @@ def createImage(name,state,pos,scale,mapPath):
 	tImage=wx.Image(mapPath,wx.BITMAP_TYPE_PNG)
 	mapSize=tImage.GetSize()
 
-	newFrame = grapPartFrame(parent=None, id=-1,imagePath=mapPath)
+	newFrame = grapPartFrame(parent=None, id=-1,imagePath=mapPath,im=tImage)
 	newFrame.pos=pos
 	newFrame.miniState=state
 	newFrame.scale=scale
-
 	#set toolTip
 	newFrame.bg.ToolTip=wx.ToolTip(name)
 	newFrame.bg.ToolTip.SetDelay(long(2900))
@@ -917,10 +943,10 @@ if __name__ == '__main__':
 	# createMap("noname_paste",True,(100,100),1,1,"imagePin")\
 
 	createImage("noname",True,imagePin_Pos,1,imagePin_Path)
-	createImage("1",True,[200,200],1,"1.png")
-	createImage("2",True,[500,500],1,"2.png")
-	testFrame=textFrame(parent=None,id=-1,text="xxxxxxxxxxxxxxx")
-	testFrame.Show()
+	createImage("1",True,[200,200],1,"2.png")
+	#createImage("1",True,[500,500],1,"1.png")
+	#testFrame=textFrame(parent=None,id=-1,text="xxxxxxxxxxxxxxx")
+	#testFrame.Show()
 
 	#start()
 	mainApp.MainLoop()
