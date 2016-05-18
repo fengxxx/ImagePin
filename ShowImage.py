@@ -152,9 +152,9 @@ class grapPartFrame(wx.Frame):
     miniState=False
     hide=False
     pos=SCREEN_POS
-    mousePos=[0,0]
     scale=1
     lastPos=[0,0]
+    lastPosSize=[0,0]
     canMove=False
     canSize=False
     bSize=SCREEN_SIZE
@@ -165,14 +165,16 @@ class grapPartFrame(wx.Frame):
     im_sizenwse=wx.Image("CURSOR_SIZENWSE.png")
     size=[100,100]
     minSize=[100,50]
+    sizeSize=[32,32]
     def __init__(self, parent, id,imagePath,im):
         wx.Frame.__init__(self, parent, id, 'fengx', size=SCREEN_SIZE,style=wx.NO_BORDER|wx.STAY_ON_TOP|wx.FRAME_NO_TASKBAR|wx.FRAME_SHAPED)
         tBmp=wx.EmptyBitmap(600,600, depth=-1)
         self.im=im
         self.size=im.GetSize()
-        self.b_sizenwse=wx.StaticBitmap(self,-1,  tBmp, (-100,-100))
-        self.b_sizenwse.SetBitmap(wx.BitmapFromImage(self.im_sizenwse))
+
         self.bg=wx.StaticBitmap(self,-1,  tBmp, (0,0))
+        self.b_sizenwse=wx.StaticBitmap(self,-1,  tBmp, (self.size[0]/2,self.size[1]/2))
+        self.b_sizenwse.SetBitmap(wx.BitmapFromImage(self.im_sizenwse))
         self.bg.Bind(wx.EVT_MOTION,  self.OnMove)
         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
         self.Bind(wx.EVT_KEY_DOWN,self.OnKeyDown)
@@ -180,8 +182,9 @@ class grapPartFrame(wx.Frame):
 
         self.bg.Bind(wx.EVT_LEFT_UP, self.OnMouseLeftUp)
         self.bg.Bind(wx.EVT_LEFT_DOWN, self.OnMouseLeftDown)
-
-
+        self.b_sizenwse.Bind(wx.EVT_LEFT_DOWN,self.OnMouseLeftDown_size)
+        self.b_sizenwse.Bind(wx.EVT_LEFT_UP,self.OnMouseLeftUp_size)
+        self.b_sizenwse.Bind(wx.EVT_MOTION,  self.OnMoveSize)
 
         self.bg.Bind(wx.EVT_LEFT_DCLICK, self.OnMouseLeftDclick)
         self.bg.Bind(wx.EVT_MIDDLE_UP,  self.onHide)
@@ -226,6 +229,7 @@ class grapPartFrame(wx.Frame):
             self.bg.SetBitmap(wx.BitmapFromImage(tim))
             self.SetSize(tSize)
             self.SetWindowShape(wx.BitmapFromImage(tim))
+        self.b_sizenwse.SetPosition((self.GetClientSize()[0]-self.im_sizenwse.Width,self.GetClientSize()[1]-self.im_sizenwse.Width))
 
     def scaleMap(self,event):
         global SCREEN_SIZE
@@ -271,25 +275,37 @@ class grapPartFrame(wx.Frame):
                 self.scale=minScale
                 self.saveData()
             self.SetWindowShape(wx.BitmapFromImage(tim))
+            self.b_sizenwse.SetPosition((self.GetClientSize()[0]-self.im_sizenwse.Width,self.GetClientSize()[1]-self.im_sizenwse.Width))
+
+
+    def OnMouseLeftDown_size(self, event):
+        self.lastPosSize[0]=wx.GetMousePosition()[0]
+        self.lastPosSize[1]=wx.GetMousePosition()[1]
+        self.b_sizenwse.CaptureMouse()
+
+        pos= event.GetPosition()
+        self.canSize=True
+        print "start move:!!!"
+        self.canMove=False
+    def OnMouseLeftUp_size(self, event):
+        #self.canMove=False
+        self.canSize=False
+        if self.b_sizenwse.HasCapture():
+            self.b_sizenwse.ReleaseMouse()
 
     def OnMouseLeftDown(self, event):
         self.lastPos[0]=wx.GetMousePosition()[0]
         self.lastPos[1]=wx.GetMousePosition()[1]
         self.bg.CaptureMouse()
+        #self.pos=event.GetPosition()
+        #pos= event.GetPosition()
+        #self.canSize=False
+        self.canMove=True
+        print "canmove:"
 
-        pos= event.GetPosition()
-        box=10
-        if self.GetClientSize()[0]-pos[0]<box and self.GetClientSize()[1]-pos[1]<box:
-            self.canSize=True
-            print "scale:::::;"
-            self.canMove=False
-        else:
-            print "move:::::;"
-            self.canSize=False
-            self.canMove=True
     def OnMouseLeftUp(self, event):
         self.canMove=False
-        self.canSize=False
+        #self.canSize=False
         if self.bg.HasCapture():
             self.bg.ReleaseMouse()
 
@@ -300,38 +316,29 @@ class grapPartFrame(wx.Frame):
     def OnMouseRightDown(self, event):
         print "RightDown"
 
-    def OnMove(self, event):
-        #size
-        newSizeX=int(wx.GetMousePosition()[0]-self.lastPos[0]+self.GetClientSize()[0])
-        #newSizeY=wx.GetMousePosition()[1]-self.lastPos[1]+self.GetClientSize()[1]
+
+    def OnMoveSize(self,event):
+        newSizeX=int(wx.GetMousePosition()[0]-self.lastPosSize[0]+self.GetClientSize()[0])
         newSizeY=int(newSizeX/(self.size[0]/float(self.size[1])))
         newSize=(newSizeX,newSizeY)
-        print "newSize",newSize
+        if self.canSize :
+            self.SetSize(newSize)
+            tim=self.im.Copy().Rescale(newSizeX,newSizeY)
+            self.bg.SetBitmap(wx.BitmapFromImage(tim))
+        self.lastPosSize=wx.GetMousePosition()
+        self.SetCursor(wx.StockCursor(wx.CURSOR_SIZENWSE))
+        self.b_sizenwse.SetPosition((self.GetClientSize()[0]-self.im_sizenwse.Width,self.GetClientSize()[1]-self.im_sizenwse.Width))
+
+    def OnMove(self, event):
         #move pos
         newPosX=wx.GetMousePosition()[0]-self.lastPos[0]+self.pos[0]
         newPosY=wx.GetMousePosition()[1]-self.lastPos[1]+self.pos[1]
         newPos=(newPosX,newPosY)
-        self.mousePos=wx.GetMousePosition()
-        if self.canMove and not self.canSize:
+        if self.canMove :
             self.SetPosition(newPos)
-            self.pos[0]=newPos[0]
-            self.pos[1]=newPos[1]
-        if not self.canMove and self.canSize :
-            #newSize=wx.Point=(int(newSize[0]),int(newSize[0]/(self.im.Width/self.im.Height)))
-            self.SetSize(newSize)
-
-            tim=self.im.Copy().Rescale(newSizeX,newSizeY)
-            self.bg.SetBitmap(wx.BitmapFromImage(tim))
-            #self.SetWindowShape(wx.BitmapFromImage(tim))
+            self.pos=newPos
+        self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
         self.lastPos=wx.GetMousePosition()
-        box=10
-        pos= event.GetPosition()
-        #print "size: ",self.GetClientSize()," | pos:",pos
-        if self.GetClientSize()[0]-pos[0]<box and self.GetClientSize()[1]-pos[1]<box:
-            self.SetCursor(wx.StockCursor(wx.CURSOR_SIZENWSE))
-        else:
-            self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
-
     def OnContextMenu(self, event):
         if not hasattr(self, "pp_SAVE"):
             self.pp_SAVE = wx.NewId()
@@ -492,7 +499,7 @@ class grapPartFrame(wx.Frame):
 
     def saveData(self):
         self.miniState=self.IsShown()
-        saveChange(MAIN_SETTINGS_TREE,self.name,self.miniState,self.pos,self.scale,self.path)
+        #saveChange(MAIN_SETTINGS_TREE,self.name,self.miniState,self.pos,self.scale,self.path)
 
     def showFrameManager(self,event):
         FM=frameManage(parent=None,id=-1)
@@ -651,22 +658,16 @@ class textFrame(wx.Frame):
 
     def __init__( self, parent,id,text ):
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = "fengx", pos = wx.DefaultPosition, size = wx.Size( 342,335 ), style = wx.FRAME_NO_TASKBAR|wx.STAY_ON_TOP|wx.TAB_TRAVERSAL )
-
         self.SetSizeHintsSz( wx.Size( 100,170 ), wx.DefaultSize )
-
         bSizer1 = wx.BoxSizer( wx.VERTICAL )
         self.SetMinSize( wx.Size( 100,20 ) )
         self.movebar = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.movebar.SetMinSize( wx.Size( 50,20 ) )
         self.movebar.SetMaxSize( wx.Size( -1,20 ) )
-
         bSizer1.Add( self.movebar, 1, wx.EXPAND |wx.ALL, 0 )
-
         self.textC = wx.TextCtrl( self, wx.ID_ANY,text, wx.DefaultPosition, wx.DefaultSize, wx.TE_MULTILINE|wx.TE_RICH )
         self.textC.SetMinSize( wx.Size( 70,70 ) )
-
         bSizer1.Add( self.textC, 6, wx.EXPAND, 0 )
-
         self.sizebar = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.sizebar.SetMinSize( wx.Size( 50,15 ) )
         self.sizebar.SetMaxSize( wx.Size( -1,20 ) )
@@ -754,7 +755,7 @@ class textFrame(wx.Frame):
         #self.lastPos[0]=wx.GetMousePosition()[0]
         #self.lastPos[1]=wx.GetMousePosition()[1]
         self.canSize=True
-        self.b_sizenwse.SetPosition(self.GetClientSize()[0]-20,self.GetClientSize()[1]-20)
+
 
     def OnSizeMouseLeftUp(self, event):
         if self.sizebar.HasCapture():
@@ -770,8 +771,8 @@ class textFrame(wx.Frame):
         newPosX=event.GetPosition()[0]-self.lastPos[0]+self.pos[0]
         newPosY=event.GetPosition()[1]-self.lastPos[1]+self.pos[1]
         newPos=wx.Point=(newPosX,newPosY)
-        self.mousePos[0]=event.GetPosition()[0]
-        self.mousePos[1]=event.GetPosition()[1]
+        #self.mousePos[0]=event.GetPosition()[0]
+        #self.mousePos[1]=event.GetPosition()[1]
         if self.canMove:
             self.SetPosition(newPos)
             self.pos[0]=newPos[0]
@@ -944,6 +945,9 @@ def createImage(name,state,pos,scale,mapPath):
 	newFrame.bg.SetBitmap(wx.BitmapFromImage(tim))
 	newFrame.SetWindowShape(wx.BitmapFromImage(tim))
 	newFrame.SetSize(tSize)
+
+	newFrame.b_sizenwse.SetPosition((tSize[0]-newFrame.im_sizenwse.Width,tSize[1]-newFrame.im_sizenwse.Width))
+
 	#saveChange(MAIN_SETTINGS_TREE,newFrame.name,state,pos,scale,mapPath)
 	if state:
 		newFrame.Show()
@@ -965,10 +969,10 @@ if __name__ == '__main__':
 	# createMap("noname_paste",True,(100,100),1,1,"imagePin")\
 
 	createImage("noname",True,imagePin_Pos,1,imagePin_Path)
-	createImage("1",True,[200,200],1,"demo.png")
-	createImage("1",True,[300,200],1,"demo1.png")
-	createImage("1",True,[400,200],1,"demo2.png")
-	createImage("1",True,[500,200],1,"demo3.png")
+	#createImage("1",True,[200,200],1,"demo.png")
+	#createImage("1",True,[300,200],1,"demo1.png")
+	#createImage("1",True,[400,200],1,"demo2.png")
+	#createImage("1",True,[500,200],1,"demo3.png")
 	createImage("1",True,[600,200],1,"demo4.png")
 	#createImage("1",True,[500,500],1,"1.png")
 	#testFrame=textFrame(parent=None,id=-1,text="xxxxxxxxxxxxxxx")
