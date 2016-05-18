@@ -123,7 +123,7 @@ ALL_ID=[]
 MAIN_SETTINGS_TREE=ElementTree("root")
 # get the screen size (support multiply display)
 SCREEN_POS=(0,0)
-SCREEN_SIZE=(100,100)
+SCREEN_SIZE=(1920,1080)
 
 SCALE_SPEED=0.1
 ADJUST_SCALE_SPEED=0.04
@@ -132,7 +132,6 @@ IMAGE_MIN_SIZE=30
 IMAGE_SCALE_MIN_MAX=[0.04,12]
 
 TEST_FRAME=[]
-
 
 class grapPartFrame(wx.Frame):
     global SCREEN_SIZE
@@ -163,6 +162,7 @@ class grapPartFrame(wx.Frame):
     ID=0
     im=wx.Image(path)
     im_sizenwse=wx.Image("CURSOR_SIZENWSE.png")
+    #im_sizenwse.SetMaskColour(0,0,255)
     size=[100,100]
     minSize=[100,50]
     sizeSize=[32,32]
@@ -171,25 +171,26 @@ class grapPartFrame(wx.Frame):
         tBmp=wx.EmptyBitmap(600,600, depth=-1)
         self.im=im
         self.size=im.GetSize()
-
         self.bg=wx.StaticBitmap(self,-1,  tBmp, (0,0))
-        self.b_sizenwse=wx.StaticBitmap(self,-1,  tBmp, (self.size[0]/2,self.size[1]/2))
+        self.b_sizenwse=wx.StaticBitmap(self.bg,-1,  tBmp, (self.size[0]/2,self.size[1]/2))
+        #bmp = wx.Bitmap("CURSOR_SIZENWSE.png", wx.BITMAP_TYPE_ANY)
+        #button = wx.BitmapButton(self.bg, id=wx.ID_ANY, bitmap=bmp, size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+        #button.SetPosition((10,10))
         self.b_sizenwse.SetBitmap(wx.BitmapFromImage(self.im_sizenwse))
-        self.bg.Bind(wx.EVT_MOTION,  self.OnMove)
-        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
-        self.Bind(wx.EVT_KEY_DOWN,self.OnKeyDown)
-        self.bg.SetDropTarget( MyFileDropTarget(self.bg,SCREEN_SIZE) )
-
-        self.bg.Bind(wx.EVT_LEFT_UP, self.OnMouseLeftUp)
-        self.bg.Bind(wx.EVT_LEFT_DOWN, self.OnMouseLeftDown)
         self.b_sizenwse.Bind(wx.EVT_LEFT_DOWN,self.OnMouseLeftDown_size)
         self.b_sizenwse.Bind(wx.EVT_LEFT_UP,self.OnMouseLeftUp_size)
         self.b_sizenwse.Bind(wx.EVT_MOTION,  self.OnMoveSize)
-
+        self.bg.Bind(wx.EVT_MOTION,  self.OnMove)
+        self.bg.SetDropTarget( MyFileDropTarget(self.bg,SCREEN_SIZE) )
+        self.bg.Bind(wx.EVT_LEFT_UP, self.OnMouseLeftUp)
+        self.bg.Bind(wx.EVT_LEFT_DOWN, self.OnMouseLeftDown)
         self.bg.Bind(wx.EVT_LEFT_DCLICK, self.OnMouseLeftDclick)
         self.bg.Bind(wx.EVT_MIDDLE_UP,  self.onHide)
+        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
+        self.Bind(wx.EVT_KEY_DOWN,self.OnKeyDown)
         self.Bind(wx.EVT_MOUSEWHEEL, self.scaleMap)
         self.path=imagePath
+
     def start(self):
         self.im_b=wx.Image(self.path)
     def SetWindowShape(self, bbmp):
@@ -232,15 +233,17 @@ class grapPartFrame(wx.Frame):
         self.b_sizenwse.SetPosition((self.GetClientSize()[0]-self.im_sizenwse.Width,self.GetClientSize()[1]-self.im_sizenwse.Width))
 
     def scaleMap(self,event):
+        print " event.GetWheelRotation()", event.GetWheelRotation()
         global SCREEN_SIZE
-        if event.GetWheelRotation()<0 and self.path!="imagePin.png" :
+        if event.GetWheelRotation()<0 :
             if  self.scale*self.size[0]>IMAGE_MIN_SIZE and self.scale*self.size[1]>IMAGE_MIN_SIZE:
                 self.scale=self.scale*(1-SCALE_SPEED)
                 self.resizeMap(self.scale)
-        elif  self.path!="imagePin.png":
-            if  self.scale*self.size[0]< SCREEN_SIZE[0]*1.4 and self.scale*self.size[1]< SCREEN_SIZE[1]*1.4:
+                print "shang:",self.scale
+        elif self.scale*self.size[0]< SCREEN_SIZE[0]*1.4 and self.scale*self.size[1]< SCREEN_SIZE[1]*1.4:
                 self.scale=self.scale*(1+SCALE_SPEED)
                 self.resizeMap(self.scale)
+                print "xia:",self.scale
 
     def OnMouseLeftDclick(self, event):
         if self.path!="imagePin.png":
@@ -328,7 +331,6 @@ class grapPartFrame(wx.Frame):
         self.lastPosSize=wx.GetMousePosition()
         self.SetCursor(wx.StockCursor(wx.CURSOR_SIZENWSE))
         self.b_sizenwse.SetPosition((self.GetClientSize()[0]-self.im_sizenwse.Width,self.GetClientSize()[1]-self.im_sizenwse.Width))
-
     def OnMove(self, event):
         #move pos
         newPosX=wx.GetMousePosition()[0]-self.lastPos[0]+self.pos[0]
@@ -642,8 +644,6 @@ class grapPartFrame(wx.Frame):
             ALL_FRAME.remove(self)
         if keycode==65 and altdown and ctrldown and shiftdown:
             grapStart(bmp)
-
-
 class textFrame(wx.Frame):
     BG_COLOR=(67,67,67)
     FG_COLOR=(120,120,120)
@@ -671,58 +671,22 @@ class textFrame(wx.Frame):
         self.sizebar = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.sizebar.SetMinSize( wx.Size( 50,15 ) )
         self.sizebar.SetMaxSize( wx.Size( -1,20 ) )
-
         bSizer1.Add( self.sizebar, 1, wx.EXPAND |wx.ALL, 0)
-
-
         self.SetSizer( bSizer1 )
         self.Layout()
-
         self.Centre( wx.BOTH )
-
-
-    # def __init__(self, parent, id,text):
-        # wx.Frame.__init__(self, parent, id, 'fengxEngine',pos=(self.pos[0],self.pos[1]),size=self.SIZE,style=wx.NO_BORDER|wx.STAY_ON_TOP|wx.FRAME_NO_TASKBAR|wx.FRAME_SHAPED)
-        # self.SetBackgroundColour(self.BG_COLOR)
-        # self.text=text
-
-        # self.main_P=wx.Panel(self,size=self.SIZE)
-        # self.main_P.SetBackgroundColour(self.BG_COLOR)
-        # self.sizebar=wx.Panel(self.main_P,pos=(0,self.SIZE[1]-12),size=(2000,2000))
-        # #self.sizebar=wx.Panel(self.main_P,pos=(0,self.SIZE[1]-12),size=(self.SIZE[0],self.SIZE[1]))
         self.sizebar.SetBackgroundColour((63,63,63))
-        # self.textC= wx.TextCtrl(self.main_P,-1, self.text,pos=(-2,26),size=((self.SIZE[1]+6),self.SIZE[1]-35), style=wx.TE_MULTILINE|wx.TE_RICH2)
         font = wx.Font(14, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL,False,"微软雅黑")#"Micrisoft YaHei")
         self.textC.SetFont(font)
         self.textC.SetBackgroundColour(self.BG_COLOR)
         self.textC.SetForegroundColour(self.FG_COLOR)
-
-        # self.movebar=wx.Panel(self.main_P,pos=(0,0),size=(self.SIZE[0],30))
         self.movebar.SetBackgroundColour((59,59,59))
-
-
-        # b_add_bmp = wx.Bitmap("text_b_add.bmp", wx.BITMAP_TYPE_BMP)
-        # b_close_bmp = wx.Bitmap("text_b_close.bmp", wx.BITMAP_TYPE_BMP)
-        # b_add_mask= wx.Mask(b_add_bmp, wx.BLUE)
-        # b_close_mask= wx.Mask(b_close_bmp, wx.BLUE)
-        # b_add_bmp.SetMask(b_add_mask)
-        # b_close_bmp.SetMask(b_add_mask)
-
-        #self.b_add=wx.BitmapButton(self.movebar, -1, b_add_bmp, (5,5),(20, 20),style = wx.NO_BORDER)
-        # self.b_add.SetBackgroundColour((19,120,20))
-
-        #self.b_close=wx.BitmapButton(self.movebar,-1,"xx",size=(20,20),pos=((self.SIZE[0]-25),5))
-        # self.b_close.SetBackgroundColour((19,120,20))
-
         self.movebar.Bind(wx.EVT_LEFT_UP, self.OnMouseLeftUp)
         self.movebar.Bind(wx.EVT_LEFT_DOWN, self.OnMouseLeftDown)
         self.movebar.Bind(wx.EVT_MOTION,  self.OnMove)
-
         self.sizebar.Bind(wx.EVT_LEFT_UP, self.OnSizeMouseLeftUp)
         self.sizebar.Bind(wx.EVT_LEFT_DOWN, self.OnSizeMouseLeftDown)
         self.sizebar.Bind(wx.EVT_MOTION,  self.OnSizeMove)
-        # self.textC.Bind(wx.EVT_MOTION, self.OnStartDrag)
-        # self.textC.SetDropTarget(MyURLDropTarget(self.textC))
 
 
     def OnStartDrag(self, evt):
@@ -788,8 +752,6 @@ class textFrame(wx.Frame):
         if self.movebar.HasCapture():
             self.movebar.ReleaseMouse()
         self.canMove=False
-
-
 def createImagePinFrame(mapPath,state,pos,scale):
     startPos=wx.Point=(pos)
     pos[0]+=SCREEN_POS[0]
@@ -835,8 +797,6 @@ class MyFileDropTarget(wx.FileDropTarget):
                     importOn=True
                     createImage("noname",True,[int(self.pos[0]*0.33),int(self.pos[1]*0.33)],1,mapName)
             if importOn==False: print "import image  failure: ",f
-
-
 class MyURLDropTarget(wx.PyDropTarget):
     def __init__(self, window):
         wx.PyDropTarget.__init__(self)
@@ -865,8 +825,6 @@ class PyConsoleFrame(wx.Frame):
         self.SetIcon(self.icon)
         import wx.py as py
         self.pyConsole= py.crust.Crust(self)
-
-
 def start():
     global ROOT_DIR
     global settings_data
@@ -910,8 +868,6 @@ def start():
     for s in ALL_FRAME:
         if s.IsShown():imagePin_show=False
     if imagePin_show:imagePinFrame.Show()
-
-
 def createImage(name,state,pos,scale,mapPath):
 	startPos=wx.Point=(pos)
 	pos[0]+=SCREEN_POS[0]
@@ -923,7 +879,7 @@ def createImage(name,state,pos,scale,mapPath):
     #    formate=wx.BITMAP_TYPE_PNG
     #else if a=="bmp" or a==".BMP":
     #        formate=wx.BITMAP_TYPE_BMP
-	tImage=wx.Image(mapPath,wx.BITMAP_TYPE_PNG)
+	tImage=wx.Image(mapPath,wx.BITMAP_TYPE_ANY)
 	mapSize=tImage.GetSize()
 
 	newFrame = grapPartFrame(parent=None, id=-1,imagePath=mapPath,im=tImage)
@@ -955,28 +911,42 @@ def createImage(name,state,pos,scale,mapPath):
 		newFrame.Hide()
 	ALL_FRAME.append(newFrame)
 	print "\ncreateMap: " , "\n    name: ",name,"\n    path: ",mapPath
+
+
+
+import screeninfo
+print dir(screeninfo)
+for m in screeninfo.get_monitors():
+    print(str(m))
+
+
 if __name__ == '__main__':
-	mainApp = wx.App()
-	print("start")
-	bmp=wx.EmptyBitmap(10,10, depth=-1)
-	#mainFrame=grapingScreenFrame(parent=None, id=-1)
-	#mainFrame.bg.SetBitmap(bmp)
+    mainApp = wx.App()
+    SCREEN_SIZE=wx.GetDisplaySize()
+    print "sizeMM",wx.GetDisplaySizeMM()
+    print "ppi",wx.GetDisplayPPI()
+    print "depth", wx.GetDisplayDepth()
+    print("start")
+    bmp=wx.EmptyBitmap(10,10, depth=-1)
+    #mainFrame=grapingScreenFrame(parent=None, id=-1)
+    #mainFrame.bg.SetBitmap(bmp)
 
-	imagePin_Path="imagePin.png"
-	imagePin_Pos=[100,100]
-	# imagePinFrame=createImagePinFrame(imagePin_Path,True,imagePin_Pos,1)
-	# imagePinFrame=createImagePinFrame(imagePin_Path,True,imagePin_Pos,1)
-	# createMap("noname_paste",True,(100,100),1,1,"imagePin")\
+    imagePin_Path="imagePin.png"
+    imagePin_Pos=[100,100]
+    # imagePinFrame=createImagePinFrame(imagePin_Path,True,imagePin_Pos,1)
+    # imagePinFrame=createImagePinFrame(imagePin_Path,True,imagePin_Pos,1)
+    # createMap("noname_paste",True,(100,100),1,1,"imagePin")\
 
-	createImage("noname",True,imagePin_Pos,1,imagePin_Path)
-	#createImage("1",True,[200,200],1,"demo.png")
-	#createImage("1",True,[300,200],1,"demo1.png")
-	#createImage("1",True,[400,200],1,"demo2.png")
-	#createImage("1",True,[500,200],1,"demo3.png")
-	createImage("1",True,[600,200],1,"demo4.png")
-	#createImage("1",True,[500,500],1,"1.png")
-	#testFrame=textFrame(parent=None,id=-1,text="xxxxxxxxxxxxxxx")
-	#testFrame.Show()
+    #createImage("noname",True,imagePin_Pos,1,imagePin_Path)
+    #createImage("1",True,[200,200],1,"demo.png")
+    #createImage("1",True,[300,200],1,"demo1.png")
+    #createImage("1",True,[400,200],1,"demo2.png")
+    #createImage("1",True,[500,200],1,"demo3.png")
+    createImage("1",True,[600,200],1,"demo3.jpg")
+    #createImage("1",True,[500,500],1,"1.png")
+    #createImage("1",True,[500,500],1,"2.png")
+    #testFrame=textFrame(parent=None,id=-1,text="xxxxxxxxxxxxxxx")
+    #testFrame.Show()
 
-	#start()
-	mainApp.MainLoop()
+    #start()
+    mainApp.MainLoop()
