@@ -5,9 +5,10 @@ reload(sys)
 sys.setdefaultencoding( "utf-8" )
 
 from PIL import Image
-import wx,os,time,random
+import wx,os,time,random,pyautogui
 from  xml.etree.ElementTree import*
 from _globalData import *
+from _imagePinUtil import *
 class grapPartFrame(wx.Frame):
     global SCREEN_SIZE
     global SCREEN_POS
@@ -326,11 +327,7 @@ class grapPartFrame(wx.Frame):
     def onDelete(self, event):
         global  ALL_FRAME
         ALL_FRAME.remove(self)
-        if os.path.isdir("backup")!=True:
-            os.mkdir("backup")
-        c="move "+self.path+" "+("backup/"+self.path)
-        os.system(c)
-        #os.remove(self.path)
+        removeFile(self.path)
         self.Close()
 
     def showALL_FRAME(self,evt):
@@ -363,7 +360,7 @@ class grapPartFrame(wx.Frame):
                     os.system(c)
 
     def showInExplorer(self, evt):
-        os.popen("explorer "+os.getcwd())
+        showImageInDesktop(os.getcwd())
 
     def beWindowsPath(self,cPath):
         newPath=""
@@ -773,10 +770,6 @@ def createImage(name,state,pos,scale,mapPath):
 	ALL_FRAME.append(newFrame)
 	print "\ncreateMap: " , "\n    name: ",name,"\n    path: ",mapPath
 
-import screeninfo
-print dir(screeninfo)
-for m in screeninfo.get_monitors():
-    print(str(m))
 
 
 if __name__ == '__main__':
@@ -808,4 +801,5 @@ if __name__ == '__main__':
     #testFrame.Show()
 
     #start()
+    pyautogui.screenshot("test.png")
     mainApp.MainLoop()

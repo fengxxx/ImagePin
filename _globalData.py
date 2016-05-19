@@ -128,3 +128,12 @@ IMAGE_MIN_SIZE=30
 IMAGE_SCALE_MIN_MAX=[0.04,12]
 
 TEST_FRAME=[]
+
+
+
+#import pyautogui
+
+
+#pyautogui.confirm(text='', title='', buttons=range(10))
+# pyautogui.screenshot("ss.png")
+# pyautogui.moveTo(10,1)
