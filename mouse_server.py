@@ -24,7 +24,7 @@ address = ('192.168.31.141', 31500)
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 t=time.time()
-p=0.01
+p=0.02
 lastPos=pyautogui.position()
 lastTime=time.time()
 c=0
