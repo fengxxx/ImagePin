@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import sys,os
+import sys,os,wx
 from  xml.etree.ElementTree import*
 reload(sys)
 sys.setdefaultencoding( "utf-8" )
@@ -129,8 +129,22 @@ IMAGE_SCALE_MIN_MAX=[0.04,12]
 
 TEST_FRAME=[]
 
+MAINFRAME=[]
 
+settings_data={
+"LANGUAGE_TYPE":LANGUAGE_TYPE,
+"SCALE_SPEED":SCALE_SPEED,
+"ADJUST_SCALE_SPEED":ADJUST_SCALE_SPEED,
+"IMAGE_MAX_SIZE":IMAGE_MAX_SIZE,
+"IMAGE_MIN_SIZE":IMAGE_MIN_SIZE,
+"IMAGE_SCALE_MIN_MAX":IMAGE_SCALE_MIN_MAX ,
+"ICON_PATH":ROOT_DIR,
+"SAVE_SCREEN_MAP_PATH":SAVE_SCREEN_MAP_PATH,
+"SET_FILE_PATH":SET_FILE_PATH,
+"GRAP_PF_NAME":GRAP_PF_NAME
+}
 
+#mainFrame=None
 #import pyautogui
 
 

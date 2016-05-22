@@ -9,6 +9,7 @@ import wx,os,time,random,pyautogui
 from  xml.etree.ElementTree import*
 from _globalData import *
 from _imagePinUtil import *
+
 class grapPartFrame(wx.Frame):
     global SCREEN_SIZE
     global SCREEN_POS
@@ -20,7 +21,6 @@ class grapPartFrame(wx.Frame):
     global TEST_FRAME
     global imagePinFrame
     global mainFrame
-
     name="no name"
     path="imagePin.png"
     isolation=False
@@ -67,8 +67,7 @@ class grapPartFrame(wx.Frame):
         self.Bind(wx.EVT_MOUSEWHEEL, self.scaleMap)
         self.path=imagePath
 
-    def start(self):
-        self.im_b=wx.Image(self.path)
+
     def SetWindowShape(self, bbmp):
         r = wx.RegionFromBitmap(bbmp)
         self.hasShape = self.SetShape(r)
@@ -76,7 +75,6 @@ class grapPartFrame(wx.Frame):
             # wxMac clips the tooltip to the window shape, YUCK!!!
             self.SetToolTipString("Right-click to close the window\n"
                                   "Double-click the image to set/unset the window shape")
-
         if wx.Platform == "__WXGTK__":
             # wxGTK requires that the window be created before you can
             # set its shape, so delay the call to SetWindowShape until
@@ -85,23 +83,17 @@ class grapPartFrame(wx.Frame):
             print "hai mei xie wang!"
         else:
             # On wxMSW and wxMac the window has already been created, so go for it.
-
-
             # Use the bitmap's mask to determine the region
             self.dc = wx.ClientDC(self)
-
             self.dc.DrawBitmap(bbmp, 0,0, True)
 
     def resizeMap(self,sc):
-
         maxPix=min(self.size)*self.scale
         minPix=min(self.size)*self.scale
-
         if (self.scale>1 and  maxPix>IMAGE_MAX_SIZE) or (self.scale<1 and  minPix<IMAGE_MIN_SIZE):
             ()
         elif self.path!="imagePin.png":
             tSize=(self.size[0]*self.scale,self.size[1]*self.scale)
-            self.im=self.im_b
             tim=self.im.Copy().Rescale(self.size[0]*self.scale,self.size[1]*self.scale)
             self.bg.SetBitmap(wx.BitmapFromImage(tim))
             self.SetSize(tSize)
@@ -128,7 +120,6 @@ class grapPartFrame(wx.Frame):
             minScale=1
             mapSize=(self.im.Width,self.im.Height)
             if self.GetSize()[0]<=minSize or self.GetSize()[1]<=minSize:
-                self.im=self.im_b
                 tim=self.im.Copy().Rescale(self.im.Width,self.im.Height)
                 self.bg.SetBitmap(wx.BitmapFromImage(tim))
                 self.SetSize((self.im.Width,self.im.Height))
@@ -192,9 +183,6 @@ class grapPartFrame(wx.Frame):
         if self.path!="imagePin.png":
             self.Close()
 
-    def OnMouseRightDown(self, event):
-        print "RightDown"
-
 
     def OnMoveSize(self,event):
         newSizeX=int(wx.GetMousePosition()[0]-self.lastPosSize[0]+self.GetClientSize()[0])
@@ -207,6 +195,7 @@ class grapPartFrame(wx.Frame):
         self.lastPosSize=wx.GetMousePosition()
         self.SetCursor(wx.StockCursor(wx.CURSOR_SIZENWSE))
         self.b_sizenwse.SetPosition((self.GetClientSize()[0]-self.im_sizenwse.Width,self.GetClientSize()[1]-self.im_sizenwse.Width))
+
     def OnMove(self, event):
         #move pos
         newPosX=wx.GetMousePosition()[0]-self.lastPos[0]+self.pos[0]
@@ -217,6 +206,7 @@ class grapPartFrame(wx.Frame):
             self.pos=newPos
         self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
         self.lastPos=wx.GetMousePosition()
+
     def OnContextMenu(self, event):
         if not hasattr(self, "pp_SAVE"):
             self.pp_SAVE = wx.NewId()
@@ -281,7 +271,7 @@ class grapPartFrame(wx.Frame):
         #if os.path.isfile("screen.png"):
         #    os.remove("screen.png")
         #os.system("taskkill /f /im  ImagePin.exe &exit()")
-        sys.exit()
+        exit()
 
     def reName(self, evt):
         dlg = wx.TextEntryDialog(
@@ -295,7 +285,7 @@ class grapPartFrame(wx.Frame):
         dlg.Destroy()
 
     def grapScreen(self, evt):
-        grapStart(bmp)
+        grapStart()
 
     def onSave(self,event):
         wildcard = "png (*.png)|*.png|bmp (*.bmp)|*.bmp|tga (*.tga)|*.tga|jpg (*.jpg)|*.jpg|"     \
@@ -385,7 +375,6 @@ class grapPartFrame(wx.Frame):
         global  ALL_FRAME
         global LANGUAGE_TYPE
         tempFrame=[]
-
         keycode = evt.GetKeyCode()
         ctrldown = evt.ControlDown()
         shiftdown = evt.ShiftDown()
@@ -407,7 +396,6 @@ class grapPartFrame(wx.Frame):
         67     C
          '''
         if 32<=keycode<=126:
-
             #------------copy and paste image
             if keycode == 86 and ctrldown and wx.TheClipboard.Open():
                 clipBitmap=wx.BitmapDataObject()
@@ -424,14 +412,12 @@ class grapPartFrame(wx.Frame):
                 wx.TheClipboard.Close()
                 print "copy image to clipboard! "
 
-
             #---------scale image
             if keycode == 45 :
                 if ctrldown==False and self.scale>IMAGE_SCALE_MIN_MAX[0] and self.path!="imagePin.png":
                     self.scale=self.scale*(1-SCALE_SPEED)
                     self.resizeMap(self.scale)
                     print "-",self.scale,SCALE_SPEED
-
                 elif   ctrldown and SCALE_SPEED>ADJUST_SCALE_SPEED*2:
                     SCALE_SPEED-=ADJUST_SCALE_SPEED
                     print "SCALE_SPEED",SCALE_SPEED
@@ -440,7 +426,6 @@ class grapPartFrame(wx.Frame):
                     self.scale=self.scale*(SCALE_SPEED+1)
                     self.resizeMap(self.scale)
                     print "+",self.scale,SCALE_SPEED
-
                 elif ctrldown and SCALE_SPEED<0.3:
                     SCALE_SPEED+=ADJUST_SCALE_SPEED
                     print "SCALE_SPEED",SCALE_SPEED
@@ -515,115 +500,296 @@ class grapPartFrame(wx.Frame):
             self.Close()
             ALL_FRAME.remove(self)
         if keycode==65 and altdown and ctrldown and shiftdown:
-            grapStart(bmp)
-class textFrame(wx.Frame):
-    BG_COLOR=(67,67,67)
-    FG_COLOR=(120,120,120)
-    SIZE=(242 ,256)
-    lastPos=[0,0]
-    canMove=False
-    canSize=False
-    mousePos=[0,0]
-    minSize=[100,50]
-    pos=[400,300]
-    size=[0,0]
+            grapStart()
 
-    def __init__( self, parent,id,text ):
-        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = "fengx", pos = wx.DefaultPosition, size = wx.Size( 342,335 ), style = wx.FRAME_NO_TASKBAR|wx.STAY_ON_TOP|wx.TAB_TRAVERSAL )
-        self.SetSizeHintsSz( wx.Size( 100,170 ), wx.DefaultSize )
-        bSizer1 = wx.BoxSizer( wx.VERTICAL )
-        self.SetMinSize( wx.Size( 100,20 ) )
-        self.movebar = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        self.movebar.SetMinSize( wx.Size( 50,20 ) )
-        self.movebar.SetMaxSize( wx.Size( -1,20 ) )
-        bSizer1.Add( self.movebar, 1, wx.EXPAND |wx.ALL, 0 )
-        self.textC = wx.TextCtrl( self, wx.ID_ANY,text, wx.DefaultPosition, wx.DefaultSize, wx.TE_MULTILINE|wx.TE_RICH )
-        self.textC.SetMinSize( wx.Size( 70,70 ) )
-        bSizer1.Add( self.textC, 6, wx.EXPAND, 0 )
-        self.sizebar = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        self.sizebar.SetMinSize( wx.Size( 50,15 ) )
-        self.sizebar.SetMaxSize( wx.Size( -1,20 ) )
-        bSizer1.Add( self.sizebar, 1, wx.EXPAND |wx.ALL, 0)
-        self.SetSizer( bSizer1 )
-        self.Layout()
-        self.Centre( wx.BOTH )
-        self.sizebar.SetBackgroundColour((63,63,63))
-        font = wx.Font(14, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL,False,"微软雅黑")#"Micrisoft YaHei")
-        self.textC.SetFont(font)
-        self.textC.SetBackgroundColour(self.BG_COLOR)
-        self.textC.SetForegroundColour(self.FG_COLOR)
-        self.movebar.SetBackgroundColour((59,59,59))
-        self.movebar.Bind(wx.EVT_LEFT_UP, self.OnMouseLeftUp)
-        self.movebar.Bind(wx.EVT_LEFT_DOWN, self.OnMouseLeftDown)
-        self.movebar.Bind(wx.EVT_MOTION,  self.OnMove)
-        self.sizebar.Bind(wx.EVT_LEFT_UP, self.OnSizeMouseLeftUp)
-        self.sizebar.Bind(wx.EVT_LEFT_DOWN, self.OnSizeMouseLeftDown)
-        self.sizebar.Bind(wx.EVT_MOTION,  self.OnSizeMove)
+class helpFrame(wx.Frame):
+    global LANGUAGE_TYPE,MAIN_SETTINGS_TREE ,settings_data
+    def __init__(self, parent,id):
+        global LANGUAGE_TYPE
+        helpSize=(900,420)
+        windowSize=(helpSize[0],(helpSize[1]+120))
+        wx.Frame.__init__(self, parent, id, 'ImagePin_help', size=windowSize,style=wx.DEFAULT_FRAME_STYLE)
+        self.SetBackgroundColour((67,67,67))
+        self.main_P=wx.Panel(self)
+        help_text=wx.StaticText(self.main_P, -1, LANGUAGE_PACK["help_infor"])#, pos=(0,0),size=helpSize)
+        font = wx.Font(13, wx.SWISS, wx.NORMAL, wx.NORMAL)
+        help_text.SetFont(font)
+        help_text.SetForegroundColour((29,29,29))
+        help_text.SetBackgroundColour((75,75,75))
 
+        fengx_text=wx.StaticText(self.main_P, -1, LANGUAGE_PACK["imagepin_tip"])#, pos=(0,0),size=helpSize)
+        fengx_text.SetForegroundColour((45,45,45))
+        box1_title = wx.StaticBox( self.main_P, -1, " " )
+        box1 = wx.StaticBoxSizer( box1_title, wx.VERTICAL, )
 
-    def OnStartDrag(self, evt):
-        if evt.Dragging():
-            url = self.textC.GetValue()
-            data = wx.URLDataObject()
-            data.SetURL(url)
-            dropSource = wx.DropSource(self.textC)
-            dropSource.SetData(data)
-            result = dropSource.DoDragDrop()
-            print result,url
-            f = urllib2.urlopen(url)
-            with open("demo2.jpg", "wb") as code:
-                code.write(f.read())
+        box1.Add( help_text, 0, wx.ALIGN_CENTRE|wx.ALL, 5 )
+        box1.Add( fengx_text, 0, wx.ALIGN_CENTRE|wx.ALL, 5 )
+        self.main_P.SetSizer(box1)
+        box1.Fit( self.main_P )
 
-    def OnSizeMove(self, event):
-        newSizeX=wx.GetMousePosition()[0]-self.lastPos[0]+self.GetClientSize()[0]
-        newSizeY=wx.GetMousePosition()[1]-self.lastPos[1]+self.GetClientSize()[1]
-        newSize=wx.Point=(newSizeX,newSizeY)
-        if self.canSize and  self.GetClientSize()[1]>self.minSize[1] and self.GetClientSize()[0]>self.minSize[0]:
-            self.SetSize(newSize)
+class TB_Icon(wx.TaskBarIcon):
+    global ICON_PATH
+    global ALL_FRAME
+    global settings_data
+    global LANGUAGE_TYPE
+    global MAIN_SETTINGS_TREE
+    global imagePinFrame
+    m_close=wx.NewId()
+    m_seting=wx.NewId()
+    m_hide=wx.NewId()
+    m_show=wx.NewId()
+    m_screenGrap=wx.NewId()
+    m_DeleteAll=wx.NewId()
+    m_reset=wx.NewId()
+    m_frameManager=wx.NewId()
+    m_showInExplorer=wx.NewId()
+    m_help=wx.NewId()
+    m_EN=wx.NewId()
+    m_CN=wx.NewId()
 
-        self.lastPos=wx.GetMousePosition()
-        #self.lastPos[0]=wx.GetMousePosition()[0]
-        #self.lastPos[1]=wx.GetMousePosition()[1]
+    def __init__(self, frame):
+        wx.TaskBarIcon.__init__(self)
+        self.frame = frame
+        self.SetIcon( wx.Icon(ICON_PATH, wx.BITMAP_TYPE_ICO), LANGUAGE_PACK["imagepin_tip"])
+        self.imgidx = 1
 
-    def OnSizeMouseLeftDown(self, event):
-        self.sizebar.CaptureMouse()
-        self.lastPos=wx.GetMousePosition()
-        #self.lastPos[0]=wx.GetMousePosition()[0]
-        #self.lastPos[1]=wx.GetMousePosition()[1]
-        self.canSize=True
-
-
-    def OnSizeMouseLeftUp(self, event):
-        if self.sizebar.HasCapture():
-            self.sizebar.ReleaseMouse()
-        self.canSize=False
-        self.b_sizenwse.SetPosition(-100,-100)
-    def OnClick(self, event):
-        self.log.write("Click! (%d)\n" % event.GetId())
+        self.Bind(wx.EVT_TASKBAR_LEFT_DCLICK, self.OnTaskBarActivate )
+        self.Bind(wx.EVT_MENU, self.showALL_FRAME, id=self.m_show)
+        self.Bind(wx.EVT_MENU, self.hideALL_FRAME, id=self.m_hide)
+        self.Bind(wx.EVT_MENU, self.grapScreen, id=self.m_screenGrap)
+        self.Bind(wx.EVT_MENU, self.closeApp, id=self.m_close)
+        self.Bind(wx.EVT_MENU, self.onDeleteAll, id=self.m_DeleteAll)
+        self.Bind(wx.EVT_MENU, self.reset, id=self.m_reset)
+        self.Bind(wx.EVT_MENU, self.frameManager,id=self.m_frameManager)
+        self.Bind(wx.EVT_MENU, self.showInExplorer,id=self.m_showInExplorer)
+        self.Bind(wx.EVT_MENU, self.showHelp,id=self.m_help)
+        self.Bind(wx.EVT_MENU, self.changeToEN,id=self.m_EN)
+        self.Bind(wx.EVT_MENU, self.changeToCN,id=self.m_CN)
 
 
 
-    def OnMove(self, event):
-        newPosX=event.GetPosition()[0]-self.lastPos[0]+self.pos[0]
-        newPosY=event.GetPosition()[1]-self.lastPos[1]+self.pos[1]
-        newPos=wx.Point=(newPosX,newPosY)
-        #self.mousePos[0]=event.GetPosition()[0]
-        #self.mousePos[1]=event.GetPosition()[1]
-        if self.canMove:
-            self.SetPosition(newPos)
-            self.pos[0]=newPos[0]
-            self.pos[1]=newPos[1]
 
-    def OnMouseLeftDown(self, event):
-        self.movebar.CaptureMouse()
-        self.lastPos[0]=event.GetPosition()[0]
-        self.lastPos[1]=event.GetPosition()[1]
-        self.canMove=True
+    def CreatePopupMenu(self):
 
-    def OnMouseLeftUp(self, event):
-        if self.movebar.HasCapture():
-            self.movebar.ReleaseMouse()
-        self.canMove=False
+
+        menu= wx.Menu()
+        menu.AppendSeparator()
+        #menu.Append(self.m_frameManager,"FrameManager")
+        menu.Append(self.m_screenGrap, LANGUAGE_PACK["grap"])
+        menu.Append(self.m_show, LANGUAGE_PACK["show_all_windows"])
+        menu.Append(self.m_hide,  LANGUAGE_PACK["hide_all_windows"])
+        menu.Append(self.m_showInExplorer, LANGUAGE_PACK["show_in_explorer"])
+        menu.AppendSeparator()
+        menu.Append(self.m_EN, LANGUAGE_PACK["menu_CN"])
+        menu.Append(self.m_CN, LANGUAGE_PACK["menu_EN"])
+        menu.Append(self.m_help,LANGUAGE_PACK["help"])
+        menu.AppendSeparator()
+        menu.Append(self.m_reset,LANGUAGE_PACK["reset_position"])
+        menu.Append(self.m_DeleteAll, LANGUAGE_PACK["delete_all_images"])
+        menu.Append(self.m_close, LANGUAGE_PACK["exit"])
+
+
+        return menu
+
+
+    def OnTaskBarActivate(self, evt):
+        imagePinFrame.Show()
+        #grapStart(bmp)
+        '''
+        if self.frame.IsIconized():
+            self.frame.Iconize(False)
+        if not self.frame.IsShown():
+            self.frame.Show(True)
+        self.frame.Raise()
+        '''
+
+    def OnTaskBarClose(self, evt):
+        self.frame.Show(False)
+
+    def OnTaskBarChange(self, evt):
+        self.SetIcon(wx.Icon(os.getcwd()+'\\arp.ico'), "This is a new icon: " + name)
+        #self.frame.Show(True)
+
+    def showHelp(self,evt):
+        newFrame = helpFrame(parent=None,id=0)
+        newFrame.Show()
+
+    def changeToEN(self,evt):
+        LANGUAGE_TYPE=0
+        save_settings_data(MAIN_SETTINGS_TREE,settings_data)
+    def changeToCN(self,evt):
+        LANGUAGE_TYPE=1
+        save_settings_data(MAIN_SETTINGS_TREE,settings_data)
+
+
+
+    def reset(self,evt):
+        i=0
+        for s in ALL_FRAME:
+            i+=1
+            try:
+                s.show()
+                s.hide=False
+                a=1
+                s.scale=0.4
+
+                s.pos=[i*15,i*15]
+                s.miniState=False
+                s.SetPosition(s.pos)
+                s.resizeMap(s.scale)
+            except :
+                ()
+        #os.remove(SET_FILE_PATH)
+
+        #MAIN_SETTINGS_TREE=Element(" ")
+        #start()
+
+    def showALL_FRAME(self,evt):
+        for s in ALL_FRAME:
+            try:
+                s.Show()
+                s.hide=False
+            except ImportError:
+                ()
+
+    def hideALL_FRAME(self,evt):
+        for s in ALL_FRAME:
+            try:
+                s.Hide()
+                s.hide=True
+            except ImportError:
+                ()
+
+    def closeApp(self, evt):
+        imagePinFrame.saveData()
+        for s in ALL_FRAME:
+            try:
+                s.saveData()
+            except:
+                ()
+        save_settings_data(MAIN_SETTINGS_TREE,settings_data)
+        self.RemoveIcon()
+        #self.frame.Close()
+        if os.path.isfile("screen.png"):
+            os.remove("screen.png")
+        os.system("taskkill /f /im  ImagePin.exe &exit()")
+        sys.exit()
+
+    def showInExplorer(self, evt):
+        os.popen("explorer "+os.getcwd())
+
+    def grapScreen(self, evt):
+        grapStart()
+
+    def onDeleteAll(self, event):
+        global ROOT_DIR
+        global ALL_FRAME
+        files= os.listdir(ROOT_DIR)
+
+        dlg = wx.MessageDialog(None, u"are you sure to delete all data\nis can't undo", u"Delete all data", wx.YES_NO | wx.ICON_QUESTION)
+        if dlg.ShowModal() == wx.ID_YES:
+            #self.Close(True)
+            #MAIN_SETTINGS_TREE.remove()
+            #saveChange()
+            for s in ALL_FRAME:
+                try:
+                    s.Hide()
+                    s.Close()
+                except ImportError:
+                    ()
+            for s in ALL_FRAME:
+                try:
+                    s.Hide()
+                    s.Close()
+                except ImportError:
+                    ()
+            for m in files:
+                if os.path.splitext(m)[1]==".png":
+                    if os.path.isdir("backup")!=True:
+                        os.mkdir("backup")
+                    c="move "+m+" " + ".\\backup\\" + os.path.split(m)[1]
+                    os.system(c)
+
+
+        ALL_FRAME=[]
+        dlg.Destroy()
+    def frameManager(self,event):
+        FM=frameManage(parent=None,id=-1)
+        FM.Show()
+
+class DragShape:
+    def __init__(self, bmp):
+        self.bmp = bmp
+        self.pos = (0,0)
+        self.shown = True
+        self.text = None
+        self.fullscreen = False
+
+    def HitTest(self, pt):
+        rect = self.GetRect()
+        return rect.InsideXY(pt.x, pt.y)
+
+    def GetRect(self):
+        return wx.Rect(self.pos[0], self.pos[1],
+                      self.bmp.GetWidth(), self.bmp.GetHeight())
+
+    def Draw(self, dc, op = wx.COPY):
+        if self.bmp.Ok():
+            memDC = wx.MemoryDC()
+            memDC.SelectObject(self.bmp)
+
+            dc.Blit(self.pos[0], self.pos[1],
+                    self.bmp.GetWidth(), self.bmp.GetHeight(),
+                    memDC, 0, 0, op, True)
+
+            return True
+        else:
+            return False
+
+class grapingScreenFrame(wx.Frame):
+    global ICON_PATH
+    global SCREEN_SIZE
+    global MAIN_SETTINGS_TREE
+    def __init__(self, parent, id):
+        wx.Frame.__init__(self, parent, id,'ImagePin',size=SCREEN_SIZE,style=wx.NO_BORDER|wx.STAY_ON_TOP|wx.FRAME_NO_TASKBAR)
+        tBmp=wx.EmptyBitmap(600,600, depth=-1)
+        self.SetSize(SCREEN_SIZE)
+
+        self.bg=wx.StaticBitmap(self,-1,  tBmp, (0,0))
+        self.bg.Bind(wx.EVT_LEFT_UP, self.OnLeftMouseUp)
+        self.bg.Bind(wx.EVT_LEFT_DOWN, self.OnLeftMouseDown)
+        self.bg.Bind(wx.EVT_MIDDLE_UP,  self.close)
+        self.bg.Bind(wx.EVT_RIGHT_DOWN,  self.close)
+
+        #self.a=wx.Panel(self,size=(1200,900))
+        #self.bce=wx.Button(self.bg, -1, label=u'Enter')
+        self.icon = wx.Icon(ICON_PATH, wx.BITMAP_TYPE_ICO)
+        self.SetIcon(self.icon)
+        self.SetPosition(SCREEN_POS)
+
+        #set icon
+        try:
+            self.tbicon = TB_Icon(self)
+        except:
+            self.tbicon = None
+
+    def OnLeftMouseDown(self, event):
+        GRAP_RECT[0]= event.GetPosition()[0]
+        GRAP_RECT[1]= event.GetPosition()[1]
+
+
+    def OnLeftMouseUp(self, event):
+        GRAP_RECT[2]= event.GetPosition()[0]
+        GRAP_RECT[3]= event.GetPosition()[1]
+
+        minSize=45
+        if abs(GRAP_RECT[3]-GRAP_RECT[1])>=minSize and abs(GRAP_RECT[2]-GRAP_RECT[0])>=minSize:
+            grap(GRAP_RECT)
+            self.Hide()
+
+    def close(self,event):
+        self.Hide()
+
 def createImagePinFrame(mapPath,state,pos,scale):
     startPos=wx.Point=(pos)
     pos[0]+=SCREEN_POS[0]
@@ -631,7 +797,7 @@ def createImagePinFrame(mapPath,state,pos,scale):
     tImage=wx.Image(mapPath,wx.BITMAP_TYPE_PNG)
     mapSize=tImage.GetSize()
 
-    newFrame = grapPartFrame(parent=None, id=-1,imagePath=mapPath)
+    newFrame = grapPartFrame(parent=None, id=-1,imagePath=mapPath,im=wx.Image(mapPath,wx.BITMAP_TYPE_ANY))
     newFrame.pos=pos
     newFrame.miniState=state
     newFrame.scale=scale
@@ -648,6 +814,7 @@ def createImagePinFrame(mapPath,state,pos,scale):
     newFrame.SetSize(tSize)
 
     return newFrame
+
 class MyFileDropTarget(wx.FileDropTarget):
     def __init__(self, window,pos):
         wx.FileDropTarget.__init__(self)
@@ -669,6 +836,7 @@ class MyFileDropTarget(wx.FileDropTarget):
                     importOn=True
                     createImage("noname",True,[int(self.pos[0]*0.33),int(self.pos[1]*0.33)],1,mapName)
             if importOn==False: print "import image  failure: ",f
+
 class MyURLDropTarget(wx.PyDropTarget):
     def __init__(self, window):
         wx.PyDropTarget.__init__(self)
@@ -688,6 +856,7 @@ class MyURLDropTarget(wx.PyDropTarget):
         self.window.AppendText(url + "\n")
 
         return d
+
 class PyConsoleFrame(wx.Frame):
     def __init__(self, parent, id):
         wx.Frame.__init__(self, parent, id, 'fengxEngine', size=(585, 405),style=wx.DEFAULT_FRAME_STYLE)
@@ -697,49 +866,24 @@ class PyConsoleFrame(wx.Frame):
         self.SetIcon(self.icon)
         import wx.py as py
         self.pyConsole= py.crust.Crust(self)
-def start():
-    global ROOT_DIR
-    global settings_data
-    LOG=""
-    files= os.listdir(ROOT_DIR)
+
+def grap(box):
+    global SAVE_SCREEN_MAP_PATH
+    global GRAP_PF_NAME
+    minSize=40
+    if abs(box[2]-box[0])>=minSize and abs(box[3]-box[1])>=minSize:
+        gTime=str(int(time.time()))
+        save_path=ROOT_DIR+"\\"+GRAP_PF_NAME+"_"+gTime+".png"
+        im = Image.open(SAVE_SCREEN_MAP_PATH)
+        print SAVE_SCREEN_MAP_PATH
+        imSize=()
+        cim=Image.new('RGB',(abs(box[2]-box[0]),abs(box[3]-box[1])))
+        region = im.crop(box)
+        cim.paste(region, (0,0))
+        cim.save(save_path)
+        createImage(os.path.basename(save_path).replace(".png",""),True,[box[0],box[1]],1,save_path)
 
 
-    loadedImages=[]
-    imagesDate=MAIN_SETTINGS_TREE.findall("images/image")
-
-    for s in imagesDate:
-        #print s.find("name").text
-        #print s.find("miniState")
-        miniState=True
-        if s.find("miniState").text=="False":
-            miniState=False
-        else:
-            miniState=True
-        pos=[int(s.find("posx").text),int(s.find("posy").text)]
-        scale=float(s.find("scale").text)
-        path=s.find("path").text
-        name=s.find("name").text
-        if os.path.isfile(path):
-            createImage(name,miniState,pos,scale,path)
-            loadedImages.append(path)
-
-        else:
-            print "\nremove exist  file setting's data: " ,"\n   name: ",s.find("name").text,"\n   path: ",s.find("path").text
-            s.find("path").text="delete"
-            imagesDate.remove(s)
-            MAIN_SETTINGS_TREE.findall("images/image").remove(s)
-
-    for s in files:
-        nameParts=os.path.basename(s).split("_")
-        if nameParts[0]==GRAP_PF_NAME:
-            if os.path.splitext(s)[1]==".png":
-                if s not in loadedImages:
-                    createImage("noname",True,[10,10],1,s)
-
-    imagePin_show=True
-    for s in ALL_FRAME:
-        if s.IsShown():imagePin_show=False
-    if imagePin_show:imagePinFrame.Show()
 def createImage(name,state,pos,scale,mapPath):
 	startPos=wx.Point=(pos)
 	pos[0]+=SCREEN_POS[0]
@@ -747,7 +891,6 @@ def createImage(name,state,pos,scale,mapPath):
 	tImage=wx.Image(mapPath,wx.BITMAP_TYPE_ANY)
 	mapSize=tImage.GetSize()
 	newFrame = grapPartFrame(parent=None, id=-1,imagePath=mapPath,im=tImage)
-	newFrame.start()
 	newFrame.pos=pos
 	newFrame.miniState=state
 	newFrame.scale=scale
@@ -769,37 +912,3 @@ def createImage(name,state,pos,scale,mapPath):
 		newFrame.Hide()
 	ALL_FRAME.append(newFrame)
 	print "\ncreateMap: " , "\n    name: ",name,"\n    path: ",mapPath
-
-
-
-if __name__ == '__main__':
-    mainApp = wx.App()
-    SCREEN_SIZE=wx.GetDisplaySize()
-    print "sizeMM",wx.GetDisplaySizeMM()
-    print "ppi",wx.GetDisplayPPI()
-    print "depth", wx.GetDisplayDepth()
-    print("start")
-    bmp=wx.EmptyBitmap(10,10, depth=-1)
-    #mainFrame=grapingScreenFrame(parent=None, id=-1)
-    #mainFrame.bg.SetBitmap(bmp)
-
-    imagePin_Path="imagePin.png"
-    imagePin_Pos=[100,100]
-    # imagePinFrame=createImagePinFrame(imagePin_Path,True,imagePin_Pos,1)
-    # imagePinFrame=createImagePinFrame(imagePin_Path,True,imagePin_Pos,1)
-    # createMap("noname_paste",True,(100,100),1,1,"imagePin")\
-
-    #createImage("noname",True,imagePin_Pos,1,imagePin_Path)
-    #createImage("1",True,[200,200],1,"demo.png")
-    #createImage("1",True,[300,200],1,"demo1.png")
-    #createImage("1",True,[400,200],1,"demo2.png")
-    #createImage("1",True,[500,200],1,"demo3.png")
-    createImage("1",True,[600,200],1,"demo3.jpg")
-    #createImage("1",True,[500,500],1,"1.png")
-    #createImage("1",True,[500,500],1,"2.png")
-    #testFrame=textFrame(parent=None,id=-1,text="xxxxxxxxxxxxxxx")
-    #testFrame.Show()
-
-    #start()
-    pyautogui.screenshot("test.png")
-    mainApp.MainLoop()
