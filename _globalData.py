@@ -116,7 +116,7 @@ CAN_GRAP=True
 GRAP_RECT=[1,1,2,2]
 ALL_FRAME=[]
 ALL_ID=[]
-MAIN_SETTINGS_TREE=ElementTree("root")
+MAIN_SETTINGS_TREE=MAIN_SETTINGS_TREE=ElementTree(file=SET_FILE_PATH).getroot()#ElementTree("root")
 # get the screen size (support multiply display)
 SCREEN_POS=(0,0)
 SCREEN_SIZE=(1920,1080)
@@ -144,7 +144,7 @@ settings_data={
 "GRAP_PF_NAME":GRAP_PF_NAME
 }
 
-#mainFrame=None
+mainFrame=None
 #import pyautogui
 
 

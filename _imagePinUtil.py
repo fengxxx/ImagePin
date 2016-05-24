@@ -82,8 +82,8 @@ def save_settings_data(mainTree,data):
             if s=="ICON_PATH" or s=="SAVE_SCREEN_MAP_PATH" or s=="SET_FILE_PATH" or s=="GRAP_PF_NAME"  or s=="GRAP_PF_NAME" :
                 mainTree.find(s).text=str(data[s])
             else:
-                mainTree.find(s).text=str(data[s])#str(data[s])
-
+                ()#mainTree.find(s).text=str(data[s])#str(data[s])
+                print "xxx"
         else:
             item=Element(s)
             if s=="ICON_PATH" or  s=="SAVE_SCREEN_MAP_PATH" or s=="SET_FILE_PATH" or s=="GRAP_PF_NAME"  or s=="GRAP_PF_NAME" :
@@ -190,7 +190,7 @@ def saveChange(mainTree,name,s,pos,sc,filePath):
     settings=ElementTree("root")
     settings._setroot(indent(mainTree))
     settings.write(SET_FILE_PATH,"utf-8")
-    print "\nsaveChange: ",name
+    #print "\nsaveChange: ",name
 
 class textFrame(wx.Frame):
     BG_COLOR=(67,67,67)
@@ -327,3 +327,6 @@ def grapPartElement(n,s,p,sc,filePath):
     gpe.append(posy)
     gpe.append(scale)
     return gpe
+
+#createSetingsFile()
+#save_settings_data(MAIN_SETTINGS_TREE,settings_data)

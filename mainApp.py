@@ -22,6 +22,7 @@ def start():
         else:
             miniState=True
         pos=[int(s.find("posx").text),int(s.find("posy").text)]
+        #print "pos:",pos
         scale=float(s.find("scale").text)
         path=s.find("path").text
         name=s.find("name").text
@@ -51,7 +52,8 @@ if __name__ == '__main__':
     if  os.path.isfile(SET_FILE_PATH)==False:
         createSetingsFile()
     MAIN_SETTINGS_TREE=ElementTree(file=SET_FILE_PATH).getroot()
-    get_settings_data(MAIN_SETTINGS_TREE,settings_data)
+
+    #error get_settings_data(MAIN_SETTINGS_TREE,settings_data)
 
     LANGUAGE_PACK=LANGUAGE_PACK_ALL[settings_data["LANGUAGE_TYPE"]]
 
